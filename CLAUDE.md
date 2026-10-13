@@ -131,7 +131,7 @@ src/
     login/demo-actions.ts   built, DEMO ONLY: demo sign-in server action
     owner/page.tsx          placeholder: owner screens, not built
     reception/page.tsx      placeholder: receptionist dashboard, not built
-    dentist/page.tsx        placeholder: dentist read-only view, not built
+    dentist/page.tsx        built: dentist read-only view (D1 to D3)
   components/
     ComingSoon.tsx          built: the "placeholder, not built yet" box
     StaffHeader.tsx         built: "Signed in as" bar with Sign out
@@ -266,13 +266,14 @@ Done:
 - Phase 2 (tested and live, commit `68a2cf1`): Poppins (via `next/font/google` in `src/app/layout.tsx`), light theme only (white background, dark text, one primary blue token `--primary` in `src/app/globals.css`), and the hairline `Settle` figure on the landing page (`src/components/LandingSettle.tsx`). `@lucasmarkes/hairline` is the only extra UI library.
 - Phase 3 (tested and live, commit `5e28d26`): receptionist move booking and delete patient data (rest of R1, R3). `moveBranchBooking` changes the times of the existing booking in one update (same service, same dentist, own branch, no notice rule, no SMS), screen at `/reception/move`. `deleteBranchPatient` deletes the patient (bookings and SMS rows cascade) and refuses if the patient also has bookings at another branch. Both live in `src/db/reception.ts`, with actions in `src/app/reception/actions.ts`. No migration was needed.
 
+Phase 4 (tested and passed, commit `c3931e7`): dentist view (D1 to D3). `getOwnDentistBookings` in `src/db/dentist.ts` returns only the signed-in dentist's booked appointments across all branches, for one Colombo day. It never selects a phone number. Screen at `/dentist`, read-only, with day navigation.
+
 Still to check on the live site: sign-out, and the wrong-role bounce (manual test 6).
 
 **Open items, in the agreed order:**
-1. Dentist view (D1 to D3). If time is short, cut this first.
-2. Owner screens: dentists, services, hours, closures, SMS log (O1 to O4).
-3. Run the full manual tests on the live site.
-4. README with screenshots, the "What I'd add for a real client" section, and a clear "concept project, fictional data" label.
+1. Owner screens: schedule across branches, closures, SMS log, then dentists, services, hours and staff logins (O1 to O4). Build in small pieces, each tested and pushed on its own.
+2. Run the full manual tests on the live site.
+3. README with screenshots, the "What I'd add for a real client" section, and a clear "concept project, fictional data" label.
 
 **Open questions:** one chair per dentist (unconfirmed); plain Tailwind vs a component library; time budget for the build (estimate 25 to 35 hours with AI help).
 
