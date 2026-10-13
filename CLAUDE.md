@@ -126,11 +126,14 @@ src/
     layout.tsx              built: page title, demo banner
     page.tsx                built: simple landing page (what this is, link to booking, demo sign-in)
     actions.ts              built: sign-out server action
-    book/page.tsx           placeholder: public patient booking page, not built
+    book/page.tsx           built: public patient booking page (P1 to P6)
     login/page.tsx          built: three demo buttons
     login/demo-actions.ts   built, DEMO ONLY: demo sign-in server action
-    owner/page.tsx          placeholder: owner screens, not built
-    reception/page.tsx      placeholder: receptionist dashboard, not built
+    owner/page.tsx          built: owner week grid and blocks (O1, O3)
+    owner/setup/page.tsx    built: edit dentists, services, hours (O2)
+    owner/sms/page.tsx      built: SMS log, simulated
+    owner/staff/page.tsx    built: read-only staff logins (O4)
+    reception/page.tsx      built: reception list, add, move, cancel, delete patient data (R1 to R3)
     dentist/page.tsx        built: dentist read-only view (D1 to D3)
   components/
     ComingSoon.tsx          built: the "placeholder, not built yet" box
@@ -138,12 +141,12 @@ src/
   lib/
     supabase-server.ts      built: the ONLY place the secret-key client is created
     auth.ts                 built: current user and role, requireRole(), session cookie
-    rules.ts                file created; booking rules (notice period, slots, closures) not built yet
-    format.ts               file created; Colombo-time formatting helpers not built yet
-  db/                       planned: small query functions. Screens call these, not supabase directly
+    rules.ts                built: booking rules (notice period, slots, closures)
+    format.ts               built: Colombo-time formatting helpers
+  db/                       built: small query functions. Screens call these, not supabase directly
 ```
 
-The owner, reception and dentist pages are **placeholders** that only prove sign-in and the role guard work. They show no real data yet.
+All screens are built and show the demo data.
 
 ## Architecture rules
 
@@ -258,7 +261,7 @@ Done:
 - Project created, Supabase project created and linked, migrations 1 to 7 pushed.
 - `scripts/seed.ts` written and run successfully (3 branches, 5 dentists, 5 services, 5 logins, 12 patients, 49 appointments, 17 simulated SMS), data checked in the Supabase dashboard.
 - Repo on GitHub, Vercel deployed from `main`, the three environment variables set in Vercel.
-- Server client, auth helpers, demo sign-in and sign-out, login page, demo banner, landing page. `/owner` and `/dentist` are still placeholders.
+- Server client, auth helpers, demo sign-in and sign-out, login page, demo banner, landing page.
 - Role guard checked locally (wrong role and signed-out visits bounce to `/login`). On the live site, sign-in works for all three demo roles.
 - Public patient booking (`/book`, P1 to P6): `src/lib/format.ts`, `src/lib/rules.ts`, `src/db/booking.ts` (`getBookingOptions`, `getAvailableSlots`). `generateSlots` / `getAvailableSlots` take optional `minNoticeMinutes` (default is the 2-hour online notice).
 - Reception list and cancel (R2, part of R1): `src/db/reception.ts` (`getBranchBookings`, `getOwnBranchName`, `cancelBranchBooking`), `/reception`.
@@ -268,12 +271,12 @@ Done:
 
 Phase 4 (tested and passed, commit `c3931e7`): dentist view (D1 to D3). `getOwnDentistBookings` in `src/db/dentist.ts` returns only the signed-in dentist's booked appointments across all branches, for one Colombo day. It never selects a phone number. Screen at `/dentist`, read-only, with day navigation.
 
-Still to check on the live site: sign-out, and the wrong-role bounce (manual test 6).
+Phase 5 (tested and passed): owner screens (O1 to O4). `106b66d` week grid across branches with branch filter and week navigation (O1). `4557abf` blocks for a branch or a dentist, with a two-step check that shows the overlap count, then save, and remove (O3). SMS log at `/owner/sms`. Setup at `/owner/setup` (O2): edit dentists (name, active, confirm when future bookings exist), services (name, duration) and opening hours (confirm when future bookings fall outside). `afc02cb` read-only staff logins list at `/owner/staff` (O4). Creating and removing logins from the browser is NOT built; it goes in the README under "What I'd add for a real client". Sign-out and the wrong-role bounce (manual test 6) were checked live and passed.
 
 **Open items, in the agreed order:**
-1. Owner screens: schedule across branches, closures, SMS log, then dentists, services, hours and staff logins (O1 to O4). Build in small pieces, each tested and pushed on its own.
-2. Run the full manual tests on the live site.
-3. README with screenshots, the "What I'd add for a real client" section, and a clear "concept project, fictional data" label.
+1. Run the full manual tests on the live site (see "Manual tests"). Run `npm run seed` first.
+2. README with screenshots, the "What I'd add for a real client" section, and a clear "concept project, fictional data" label.
+3. Optional: Phase 6 custom hairline figures (max 3), and the "9:00 am" lowercase fix in `format.ts` (spec says AM/PM).
 
 **Open questions:** one chair per dentist (unconfirmed); plain Tailwind vs a component library; time budget for the build (estimate 25 to 35 hours with AI help).
 
