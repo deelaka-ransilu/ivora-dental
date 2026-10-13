@@ -132,7 +132,7 @@ src/
     owner/page.tsx          built: owner week grid and blocks (O1, O3)
     owner/setup/page.tsx    built: edit dentists, services, hours (O2)
     owner/sms/page.tsx      built: SMS log, simulated
-    owner/staff/page.tsx    built: read-only staff logins (O4)
+    owner/staff/page.tsx    built: staff logins, create and deactivate (O4)
     reception/page.tsx      built: reception list, add, move, cancel, delete patient data (R1 to R3)
     dentist/page.tsx        built: dentist read-only view (D1 to D3)
   components/
@@ -271,7 +271,7 @@ Done:
 
 Phase 4 (tested and passed, commit `c3931e7`): dentist view (D1 to D3). `getOwnDentistBookings` in `src/db/dentist.ts` returns only the signed-in dentist's booked appointments across all branches, for one Colombo day. It never selects a phone number. Screen at `/dentist`, read-only, with day navigation.
 
-Phase 5 (tested and passed): owner screens (O1 to O4). `106b66d` week grid across branches with branch filter and week navigation (O1). `4557abf` blocks for a branch or a dentist, with a two-step check that shows the overlap count, then save, and remove (O3). SMS log at `/owner/sms`. Setup at `/owner/setup` (O2): edit dentists (name, active, confirm when future bookings exist), services (name, duration) and opening hours (confirm when future bookings fall outside). `afc02cb` read-only staff logins list at `/owner/staff` (O4). Creating and removing logins from the browser is NOT built; it goes in the README under "What I'd add for a real client". Sign-out and the wrong-role bounce (manual test 6) were checked live and passed.
+Phase 5 (tested and passed): owner screens (O1 to O4). `106b66d` week grid across branches with branch filter and week navigation (O1). `4557abf` blocks for a branch or a dentist, with a two-step check that shows the overlap count, then save, and remove (O3). SMS log at `/owner/sms`. Setup at `/owner/setup` (O2): edit dentists (name, active, confirm when future bookings exist), services (name, duration) and opening hours (confirm when future bookings fall outside). `/owner/staff` (O4): list logins, create receptionist and dentist logins, deactivate or reactivate (nothing is deleted; not yourself, not the owner). Demo limits: email must end in `@ivora-demo.test`, password 8 or more characters, 15 logins at most. `npm run seed` removes created logins. Editing branches from the browser is NOT built; it goes in the README under "What I'd add for a real client". Sign-out and the wrong-role bounce (manual test 6) were checked live and passed.
 
 **Open items, in the agreed order:**
 1. Run the full manual tests on the live site (see "Manual tests"). Run `npm run seed` first.
