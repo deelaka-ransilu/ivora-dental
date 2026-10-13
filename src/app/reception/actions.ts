@@ -4,7 +4,11 @@
 
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth";
-import { cancelBranchBooking } from "@/db/reception";
+import {
+  cancelBranchBooking,
+  deleteBranchPatient,
+  moveBranchBooking,
+} from "@/db/reception";
 import { createBranchBooking } from "@/db/reception-create";
 import { colomboDateString, isColomboDate } from "@/lib/format";
 
@@ -76,4 +80,49 @@ export async function addBooking(formData: FormData) {
   if (!result.ok) return fail(result.reason);
 
   redirect(`/reception?date=${colomboDateString(result.startAt)}&added=1`);
+}
+
+// Move a booking to a new time (same service, same dentist, same branch).
+// "date" is the day the receptionist searched on the move screen.
+export async function moveBooking(formData: FormData) {
+  const user = await requireRole(["receptionist"]);
+
+  const id = field(formData, "id");
+  const rawDate = field(formData, "date");
+  const slot = field(formData, "slot"); // the new start time (ISO timestamp)
+
+  // Send the receptionist back to the move screen, with an error code.
+  const fail = (error: string): never => {
+    const params = new URLSearchParams();
+    params.set("id", id);
+    if (isColomboDate(rawDate)) params.set("date", rawDate);
+    params.set("error", error);
+    redirect(`/reception/move?${params.toString()}`);
+  };
+
+  if (!UUID.test(id)) redirect("/reception?error=notfound");
+  if (!slot || Number.isNaN(new Date(slot).getTime())) fail("slot");
+
+  const result = await moveBranchBooking(user, id, slot);
+  if (!result.ok) {
+    if (result.reason === "notfound") redirect("/reception?error=notfound");
+    return fail(result.reason);
+  }
+
+  redirect(`/reception?date=${colomboDateString(result.startAt)}&moved=1`);
+}
+
+// R3: delete a patient's data on request. Removes the patient and all their
+// bookings. Refuses if the patient also has bookings at another branch.
+export async function deletePatientData(formData: FormData) {
+  const user = await requireRole(["receptionist"]);
+
+  const id = field(formData, "id");
+  const rawDate = field(formData, "date");
+  const date = isColomboDate(rawDate) ? rawDate : colomboDateString();
+
+  const result = await deleteBranchPatient(user, id);
+  if (!result.ok) redirect(`/reception?date=${date}&error=${result.reason}`);
+
+  redirect(`/reception?date=${date}&deleted=1`);
 }

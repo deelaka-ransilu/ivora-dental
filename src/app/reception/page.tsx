@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth";
 import StaffHeader from "@/components/StaffHeader";
 import { getBranchBookings, getOwnBranchName } from "@/db/reception";
-import { cancelBooking } from "./actions";
+import { cancelBooking, deletePatientData } from "./actions";
 import {
   addDaysToColomboDate,
   colomboDateString,
@@ -17,14 +17,28 @@ export const metadata: Metadata = { title: "Reception" };
 
 type Params = Record<string, string | string[] | undefined>;
 
+function one(value: string | string[] | undefined): string {
+  return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
+}
+
 const SOURCE_LABEL = {
   online: "Online",
   phone: "Phone",
   walk_in: "Walk-in",
 } as const;
 
+const ERRORS: Record<string, string> = {
+  notfound: "That booking could not be found at this branch.",
+  other_branch:
+    "This patient also has bookings at another branch, so their data cannot be deleted here.",
+  server: "Something went wrong on our side. Please try again.",
+};
+
 const linkButton =
   "inline-flex min-h-11 items-center justify-center rounded-md border border-neutral-500/60 px-4 text-base font-medium hover:bg-neutral-500/20";
+
+const summaryButton =
+  "flex min-h-11 cursor-pointer items-center rounded-md border border-neutral-500/60 px-4 text-base font-medium hover:bg-neutral-500/20";
 
 export default function ReceptionPage({
   searchParams,
@@ -46,8 +60,11 @@ async function ReceptionContent({
   const user = await requireRole(["receptionist"]);
 
   const p = await searchParams;
-  const raw = Array.isArray(p.date) ? (p.date[0] ?? "") : (p.date ?? "");
-  const added = (Array.isArray(p.added) ? p.added[0] : p.added) === "1";
+  const raw = one(p.date);
+  const added = one(p.added) === "1";
+  const moved = one(p.moved) === "1";
+  const deleted = one(p.deleted) === "1";
+  const error = one(p.error);
   const today = colomboDateString();
   const date = isColomboDate(raw) ? raw : today;
 
@@ -76,6 +93,30 @@ async function ReceptionContent({
           className="mt-4 rounded-md border border-green-600 p-3 text-sm"
         >
           Booking added.
+        </p>
+      )}
+      {moved && (
+        <p
+          role="status"
+          className="mt-4 rounded-md border border-green-600 p-3 text-sm"
+        >
+          Booking moved.
+        </p>
+      )}
+      {deleted && (
+        <p
+          role="status"
+          className="mt-4 rounded-md border border-green-600 p-3 text-sm"
+        >
+          Patient data deleted.
+        </p>
+      )}
+      {error && ERRORS[error] && (
+        <p
+          role="alert"
+          className="mt-4 rounded-md border border-red-500 p-3 text-sm"
+        >
+          Error: {ERRORS[error]}
         </p>
       )}
 
@@ -154,26 +195,48 @@ async function ReceptionContent({
               </p>
 
               {b.status === "booked" && (
-                <details className="mt-3">
-                  <summary className="flex min-h-11 cursor-pointer items-center rounded-md border border-neutral-500/60 px-4 text-base font-medium hover:bg-neutral-500/20">
-                    Cancel booking
-                  </summary>
-                  <form action={cancelBooking} className="mt-2">
-                    <input type="hidden" name="id" value={b.id} />
-                    <input type="hidden" name="date" value={date} />
-                    <p className="mb-2 text-sm">
-                      Cancel the booking for {b.patientName} at{" "}
-                      {formatTime(b.startAt)}? The time becomes free again.
-                    </p>
-                    <button
-                      type="submit"
-                      className="min-h-11 rounded-md bg-red-700 px-4 font-semibold text-white"
-                    >
-                      Yes, cancel this booking
-                    </button>
-                  </form>
-                </details>
+                <div className="mt-3 space-y-2">
+                  <a href={`/reception/move?id=${b.id}`} className={linkButton}>
+                    Move booking
+                  </a>
+
+                  <details>
+                    <summary className={summaryButton}>Cancel booking</summary>
+                    <form action={cancelBooking} className="mt-2">
+                      <input type="hidden" name="id" value={b.id} />
+                      <input type="hidden" name="date" value={date} />
+                      <p className="mb-2 text-sm">
+                        Cancel the booking for {b.patientName} at{" "}
+                        {formatTime(b.startAt)}? The time becomes free again.
+                      </p>
+                      <button
+                        type="submit"
+                        className="min-h-11 rounded-md bg-red-700 px-4 font-semibold text-white"
+                      >
+                        Yes, cancel this booking
+                      </button>
+                    </form>
+                  </details>
+                </div>
               )}
+
+              <details className="mt-2">
+                <summary className={summaryButton}>Delete patient data</summary>
+                <form action={deletePatientData} className="mt-2">
+                  <input type="hidden" name="id" value={b.id} />
+                  <input type="hidden" name="date" value={date} />
+                  <p className="mb-2 text-sm">
+                    Delete {b.patientName}&apos;s name and phone number, and all
+                    of their bookings? This cannot be undone.
+                  </p>
+                  <button
+                    type="submit"
+                    className="min-h-11 rounded-md bg-red-700 px-4 font-semibold text-white"
+                  >
+                    Yes, delete this patient&apos;s data
+                  </button>
+                </form>
+              </details>
             </li>
           ))}
         </ul>
