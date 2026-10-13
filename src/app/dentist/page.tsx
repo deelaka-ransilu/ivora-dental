@@ -20,8 +20,7 @@ function one(value: string | string[] | undefined): string {
   return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
 }
 
-const linkButton =
-  "inline-flex min-h-11 items-center justify-center rounded-md border border-neutral-500/60 px-4 text-base font-medium hover:bg-neutral-500/20";
+const linkButton = "btn btn-light min-h-11";
 
 // The page is not async. Cookies and searchParams are read in the child
 // component, behind Suspense, as Cache Components requires.
@@ -31,7 +30,7 @@ export default function DentistPage({
   searchParams: Promise<Params>;
 }) {
   return (
-    <Suspense fallback={<p className="p-4">Loading...</p>}>
+    <Suspense fallback={<p className="p-4 text-muted">Loading...</p>}>
       <DentistContent searchParams={searchParams} />
     </Suspense>
   );
@@ -52,19 +51,19 @@ async function DentistContent({
   const bookings = await getOwnDentistBookings(user, date);
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6">
+    <main className="mx-auto w-full max-w-3xl px-4 py-6">
       <StaffHeader user={user} />
 
-      <h1 className="mt-6 text-2xl font-bold">My bookings</h1>
-      <p className="mt-1 text-sm opacity-80">
+      <h1 className="mt-8 text-3xl font-medium tracking-tight">My bookings</h1>
+      <p className="mt-1 text-sm text-muted">
         {formatDate(colomboToDate(date, "12:00"))}: {bookings.length} booked
         (all branches)
       </p>
-      <p className="mt-1 text-sm opacity-80">
+      <p className="mt-1 text-sm text-muted">
         Read-only. To change a booking, please ask reception.
       </p>
 
-      <div className="mt-4 flex flex-wrap items-end gap-3">
+      <div className="mt-5 flex flex-wrap items-end gap-3">
         <a
           href={`/dentist?date=${addDaysToColomboDate(date, -1)}`}
           className={linkButton}
@@ -94,31 +93,27 @@ async function DentistContent({
             name="date"
             required
             defaultValue={date}
-            className="mt-1 block min-h-11 rounded-md border border-neutral-500 bg-white px-3 text-black"
+            className="mt-1.5 block min-h-11 rounded-xl border border-line bg-surface px-3 text-foreground"
           />
         </label>
-        <button
-          type="submit"
-          className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground hover:bg-primary-hover"
-        >
+        <button type="submit" className="btn btn-dark min-h-11">
           Show bookings
         </button>
       </form>
 
       {bookings.length === 0 ? (
-        <p className="mt-6 text-sm">You have no bookings on this day.</p>
+        <p className="card mt-6 p-6 text-sm text-muted">
+          You have no bookings on this day.
+        </p>
       ) : (
         <ul className="mt-6 space-y-3">
           {bookings.map((b) => (
-            <li
-              key={b.id}
-              className="rounded-md border border-neutral-500/60 p-4"
-            >
-              <p className="text-lg font-semibold">
+            <li key={b.id} className="card p-5">
+              <p className="text-lg font-medium">
                 {formatTime(b.startAt)} to {formatTime(b.endAt)}
               </p>
               <p className="mt-1 font-medium">{b.patientName}</p>
-              <p className="text-sm opacity-80">
+              <p className="text-sm text-muted">
                 {b.serviceName} at {b.branchName}
               </p>
             </li>

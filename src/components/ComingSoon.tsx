@@ -6,9 +6,9 @@ export default function ComingSoon({
   items: string[];
 }) {
   return (
-    <section className="mt-6 rounded-md border border-dashed border-neutral-500/60 p-4">
-      <h2 className="text-lg font-semibold">{title}</h2>
-      <p className="mt-1 text-sm opacity-70">
+    <section className="mt-6 rounded-card border border-dashed border-line bg-surface p-6">
+      <h2 className="text-lg font-medium">{title}</h2>
+      <p className="mt-1 text-sm text-muted">
         Placeholder, not built yet. This screen will let you:
       </p>
       <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
