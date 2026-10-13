@@ -41,13 +41,13 @@ const ERRORS: Record<string, string> = {
 };
 
 const buttonClass =
-  "min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground hover:bg-primary-hover";
+  "btn btn-dark min-h-11";
 
 const inputClass =
-  "mt-1 block min-h-11 w-full rounded-md border border-neutral-500 bg-white px-3 text-black";
+  "mt-1.5 block min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-foreground";
 
 const summaryButton =
-  "flex min-h-11 cursor-pointer items-center rounded-md border border-neutral-500/60 px-4 text-base font-medium hover:bg-neutral-500/20";
+  "btn btn-light min-h-11 cursor-pointer";
 
 // The page is not async. The cookie and searchParams are read in the child,
 // behind Suspense, as Cache Components requires.
@@ -82,10 +82,10 @@ async function StaffContent({
   const error = one(p.error);
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6">
+    <main className="mx-auto w-full max-w-3xl px-4 py-6">
       <StaffHeader user={user} />
 
-      <h1 className="mt-6 text-2xl font-bold">Staff logins</h1>
+      <h1 className="mt-8 text-3xl font-medium tracking-tight">Staff logins</h1>
       <p className="mt-1 text-sm opacity-80">
         Who can sign in, and what each login can see. Logins are never deleted.
         Deactivate one to stop it signing in.
@@ -95,24 +95,24 @@ async function StaffContent({
       </a>
 
       {created && (
-        <p role="status" className="mt-4 rounded-md border border-green-600 p-3 text-sm">
+        <p role="status" className="mt-4 rounded-card border border-green-300 bg-green-50 p-4 text-sm text-green-900">
           Login created.
         </p>
       )}
       {updated && (
-        <p role="status" className="mt-4 rounded-md border border-green-600 p-3 text-sm">
+        <p role="status" className="mt-4 rounded-card border border-green-300 bg-green-50 p-4 text-sm text-green-900">
           Login updated.
         </p>
       )}
       {error && ERRORS[error] && (
-        <p role="alert" className="mt-4 rounded-md border border-red-500 p-3 text-sm">
+        <p role="alert" className="mt-4 rounded-card border border-red-300 bg-red-50 p-4 text-sm text-red-800">
           Error: {ERRORS[error]}
         </p>
       )}
 
       <ul className="mt-4 space-y-3">
         {staff.map((s) => (
-          <li key={s.id} className="rounded-md border border-neutral-500/60 p-4">
+          <li key={s.id} className="card p-5">
             <p className="font-semibold">{s.fullName}</p>
             <p className="text-sm">
               {ROLE_LABEL[s.role]}: {s.isActive ? "Active" : "Inactive"}
@@ -143,7 +143,7 @@ async function StaffContent({
                     type="submit"
                     className={
                       s.isActive
-                        ? "min-h-11 rounded-md bg-red-700 px-4 font-semibold text-white"
+                        ? "btn min-h-11 bg-red-700 text-white hover:bg-red-800"
                         : buttonClass
                     }
                   >
@@ -156,8 +156,8 @@ async function StaffContent({
         ))}
       </ul>
 
-      <section className="mt-10 rounded-md border border-neutral-500/60 p-4">
-        <h2 className="text-lg font-semibold">Add a login</h2>
+      <section className="mt-10 card p-5">
+        <h2 className="text-xl font-medium">Add a login</h2>
         <p className="mt-1 text-sm opacity-80">
           Demo only: use a fake email ending in {DEMO_EMAIL_DOMAIN}. The
           password is never shown again.

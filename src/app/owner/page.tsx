@@ -56,16 +56,16 @@ const ERRORS: Record<string, string> = {
 };
 
 const linkButton =
-  "inline-flex min-h-11 items-center justify-center rounded-md border border-neutral-500/60 px-4 text-base font-medium hover:bg-neutral-500/20";
+  "btn btn-light min-h-11";
 
 const buttonClass =
-  "min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground hover:bg-primary-hover";
+  "btn btn-dark min-h-11";
 
 const inputClass =
-  "mt-1 block min-h-11 w-full rounded-md border border-neutral-500 bg-white px-3 text-black";
+  "mt-1.5 block min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-foreground";
 
 const summaryButton =
-  "flex min-h-11 cursor-pointer items-center rounded-md border border-neutral-500/60 px-4 text-base font-medium hover:bg-neutral-500/20";
+  "btn btn-light min-h-11 cursor-pointer";
 
 // Monday of the week that contains this Colombo date.
 function weekStartOf(isoDate: string): string {
@@ -241,10 +241,10 @@ async function OwnerContent({
   const nextHref = `/owner?week=${addDaysToColomboDate(weekStart, 7)}${branchQuery}`;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-6">
+    <main className="mx-auto w-full max-w-6xl px-4 py-6">
       <StaffHeader user={user} />
 
-      <h1 className="mt-6 text-2xl font-bold">Schedule: {branchName}</h1>
+      <h1 className="mt-8 text-3xl font-medium tracking-tight">Schedule: {branchName}</h1>
       <a href="/owner/sms" className="mt-2 inline-flex min-h-11 items-center underline">
         View SMS log (simulated)
       </a>
@@ -261,17 +261,17 @@ async function OwnerContent({
       </p>
 
       {blockedFlag && (
-        <p role="status" className="mt-4 rounded-md border border-green-600 p-3 text-sm">
+        <p role="status" className="mt-4 rounded-card border border-green-300 bg-green-50 p-4 text-sm text-green-900">
           Block saved. New bookings are stopped for that time.
         </p>
       )}
       {removedFlag && (
-        <p role="status" className="mt-4 rounded-md border border-green-600 p-3 text-sm">
+        <p role="status" className="mt-4 rounded-card border border-green-300 bg-green-50 p-4 text-sm text-green-900">
           Block removed.
         </p>
       )}
       {error && ERRORS[error] && (
-        <p role="alert" className="mt-4 rounded-md border border-red-500 p-3 text-sm">
+        <p role="alert" className="mt-4 rounded-card border border-red-300 bg-red-50 p-4 text-sm text-red-800">
           Error: {ERRORS[error]}
         </p>
       )}
@@ -299,7 +299,7 @@ async function OwnerContent({
           <select
             name="branch"
             defaultValue={branchId}
-            className="mt-1 block min-h-11 rounded-md border border-neutral-500 bg-white px-3 text-black"
+            className="mt-1.5 block min-h-11 rounded-xl border border-line bg-surface px-3 text-foreground"
           >
             <option value="">All branches</option>
             {branches.map((b) => (
@@ -314,7 +314,7 @@ async function OwnerContent({
         </button>
       </form>
 
-      <div className="mt-6 overflow-x-auto">
+      <div className="card mt-6 overflow-x-auto p-3">
         <div className="min-w-[840px]">
           {/* Day headings */}
           <div className="flex border-b border-neutral-500/60">
@@ -399,7 +399,7 @@ async function OwnerContent({
                       title={`${formatTime(pl.booking.startAt)} to ${formatTime(
                         pl.booking.endAt
                       )}\n${pl.booking.patientName} ${pl.booking.patientPhone}\n${pl.booking.serviceName} with ${pl.booking.dentistName}\n${pl.booking.branchName}`}
-                      className="absolute overflow-hidden rounded border border-primary/60 bg-primary/10 px-1 py-0.5 text-xs leading-tight"
+                      className="absolute overflow-hidden rounded-lg border border-accent/40 bg-accent-soft px-1 py-0.5 text-xs leading-tight"
                       style={{
                         top: pl.top,
                         height: pl.height,
@@ -436,8 +436,8 @@ async function OwnerContent({
       </div>
 
       {/* ---- O3: add a block ---- */}
-      <section className="mt-10 rounded-md border border-neutral-500/60 p-4">
-        <h2 className="text-lg font-semibold">Block a branch or a dentist</h2>
+      <section className="mt-10 card p-5">
+        <h2 className="text-xl font-medium">Block a branch or a dentist</h2>
         <p className="mt-1 text-sm opacity-80">
           Blocks stop new bookings in that time. They do not cancel existing
           bookings.
@@ -543,13 +543,13 @@ async function OwnerContent({
         </form>
 
         {showPreview && previewError && (
-          <p role="alert" className="mt-4 rounded-md border border-red-500 p-3 text-sm">
+          <p role="alert" className="mt-4 rounded-card border border-red-300 bg-red-50 p-4 text-sm text-red-800">
             Error: {previewError}
           </p>
         )}
 
         {preview && (
-          <div className="mt-4 rounded-md border border-neutral-500/60 p-4">
+          <div className="mt-4 card p-5">
             <p className="text-sm opacity-80">Check before saving</p>
             <p className="mt-1 font-semibold">{preview.name}</p>
             <p className="text-sm">
@@ -589,13 +589,13 @@ async function OwnerContent({
 
       {/* ---- Blocks in this week ---- */}
       <section className="mt-8">
-        <h2 className="text-lg font-semibold">Blocks this week</h2>
+        <h2 className="text-xl font-medium">Blocks this week</h2>
         {blocks.length === 0 ? (
           <p className="mt-2 text-sm opacity-80">No blocks this week.</p>
         ) : (
           <ul className="mt-3 space-y-3">
             {blocks.map((b) => (
-              <li key={b.id} className="rounded-md border border-neutral-500/60 p-4">
+              <li key={b.id} className="card p-5">
                 <p className="font-semibold">
                   {b.kind === "branch" ? "Branch" : "Dentist"}: {b.targetName}
                 </p>
@@ -615,7 +615,7 @@ async function OwnerContent({
                     </p>
                     <button
                       type="submit"
-                      className="min-h-11 rounded-md bg-red-700 px-4 font-semibold text-white"
+                      className="btn min-h-11 bg-red-700 text-white hover:bg-red-800"
                     >
                       Yes, remove this block
                     </button>

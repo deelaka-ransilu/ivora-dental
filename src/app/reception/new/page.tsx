@@ -35,9 +35,9 @@ const ERRORS: Record<string, string> = {
 };
 
 const inputClass =
-  "mt-1 block min-h-11 w-full rounded-md border border-neutral-500 bg-white px-3 text-black";
+  "mt-1.5 block min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-foreground";
 const buttonClass =
-  "min-h-11 w-full rounded-md bg-primary px-4 font-semibold text-primary-foreground hover:bg-primary-hover";
+  "btn btn-dark min-h-11 w-full";
 
 export default function NewBookingPage({
   searchParams,
@@ -95,10 +95,10 @@ async function NewBookingContent({
       : null;
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6">
+    <main className="mx-auto w-full max-w-3xl px-4 py-6">
       <StaffHeader user={user} />
 
-      <h1 className="mt-6 text-2xl font-bold">Add a booking at {branchName}</h1>
+      <h1 className="mt-8 text-3xl font-medium tracking-tight">Add a booking at {branchName}</h1>
       <p className="mt-1 text-sm opacity-80">
         For phone calls and walk-ins. Times start from now.
       </p>
@@ -112,7 +112,7 @@ async function NewBookingContent({
       {error && ERRORS[error] && (
         <p
           role="alert"
-          className="mt-4 rounded-md border border-red-500 p-3 text-sm"
+          className="mt-4 rounded-card border border-red-300 bg-red-50 p-4 text-sm text-red-800"
         >
           Error: {ERRORS[error]}
         </p>
@@ -205,7 +205,7 @@ async function NewBookingContent({
                       required
                       className="peer sr-only"
                     />
-                    <span className="flex min-h-11 flex-col justify-center rounded-md border border-neutral-500 px-3 py-1 text-sm peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-primary">
+                    <span className="flex min-h-11 flex-col justify-center rounded-xl border border-line bg-surface px-3 py-1 text-sm peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-primary">
                       <span className="font-semibold">
                         {formatTime(s.startAt)}
                       </span>
@@ -248,11 +248,11 @@ async function NewBookingContent({
           <fieldset>
             <legend className="text-sm font-medium">How was it booked?</legend>
             <div className="mt-2 flex flex-wrap gap-3">
-              <label className="flex min-h-11 items-center gap-2 rounded-md border border-neutral-500 px-4 text-sm">
+              <label className="flex min-h-11 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm">
                 <input type="radio" name="source" value="phone" required />
                 Phone
               </label>
-              <label className="flex min-h-11 items-center gap-2 rounded-md border border-neutral-500 px-4 text-sm">
+              <label className="flex min-h-11 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm">
                 <input type="radio" name="source" value="walk_in" required />
                 Walk-in
               </label>

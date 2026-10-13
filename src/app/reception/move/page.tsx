@@ -31,9 +31,9 @@ const ERRORS: Record<string, string> = {
 };
 
 const inputClass =
-  "mt-1 block min-h-11 w-full rounded-md border border-neutral-500 bg-white px-3 text-black";
+  "mt-1.5 block min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-foreground";
 const buttonClass =
-  "min-h-11 w-full rounded-md bg-primary px-4 font-semibold text-primary-foreground hover:bg-primary-hover";
+  "btn btn-dark min-h-11 w-full";
 
 export default function MoveBookingPage({
   searchParams,
@@ -85,10 +85,10 @@ async function MoveBookingContent({
       : null;
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6">
+    <main className="mx-auto w-full max-w-3xl px-4 py-6">
       <StaffHeader user={user} />
 
-      <h1 className="mt-6 text-2xl font-bold">Move a booking</h1>
+      <h1 className="mt-8 text-3xl font-medium tracking-tight">Move a booking</h1>
       <a
         href={`/reception?date=${currentDate}`}
         className="mt-3 inline-flex min-h-11 items-center underline"
@@ -96,7 +96,7 @@ async function MoveBookingContent({
         Back to bookings
       </a>
 
-      <div className="mt-4 rounded-md border border-neutral-500/60 p-4">
+      <div className="mt-4 card p-5">
         <p className="text-sm opacity-80">Current booking</p>
         <p className="mt-1 text-lg font-semibold">
           {formatDate(booking.startAt)}, {formatTime(booking.startAt)} to{" "}
@@ -114,7 +114,7 @@ async function MoveBookingContent({
       {error && ERRORS[error] && (
         <p
           role="alert"
-          className="mt-4 rounded-md border border-red-500 p-3 text-sm"
+          className="mt-4 rounded-card border border-red-300 bg-red-50 p-4 text-sm text-red-800"
         >
           Error: {ERRORS[error]}
         </p>
@@ -172,7 +172,7 @@ async function MoveBookingContent({
                     required
                     className="peer sr-only"
                   />
-                  <span className="flex min-h-11 items-center justify-center rounded-md border border-neutral-500 px-3 py-1 text-sm font-semibold peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-primary">
+                  <span className="flex min-h-11 items-center justify-center rounded-xl border border-line bg-surface px-3 py-1 text-sm font-semibold peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-primary">
                     {formatTime(s.startAt)}
                   </span>
                 </label>

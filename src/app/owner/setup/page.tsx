@@ -24,11 +24,11 @@ const DAY_NAMES = [
 ];
 
 const inputClass =
-  "mt-1 block min-h-11 w-full rounded-md border border-neutral-500 bg-white px-3 text-black";
+  "mt-1.5 block min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-foreground";
 const buttonClass =
-  "min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground hover:bg-primary-hover";
+  "btn btn-dark min-h-11";
 const linkButton =
-  "inline-flex min-h-11 items-center justify-center rounded-md border border-neutral-500/60 px-4 text-base font-medium hover:bg-neutral-500/20";
+  "btn btn-light min-h-11";
 
 function errorText(code: string, n: string): string {
   switch (code) {
@@ -75,10 +75,10 @@ async function SetupContent({
   const data = await getSetupData(user);
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6">
+    <main className="mx-auto w-full max-w-3xl px-4 py-6">
       <StaffHeader user={user} />
 
-      <h1 className="mt-6 text-2xl font-bold">Setup</h1>
+      <h1 className="mt-8 text-3xl font-medium tracking-tight">Setup</h1>
       <p className="mt-1 text-sm opacity-80">
         Edit only. Nothing is deleted. Changes apply to new bookings.
       </p>
@@ -87,26 +87,26 @@ async function SetupContent({
       </a>
 
       {saved && (
-        <p role="status" className="mt-4 rounded-md border border-green-600 p-3 text-sm">
+        <p role="status" className="mt-4 rounded-card border border-green-300 bg-green-50 p-4 text-sm text-green-900">
           Saved.
         </p>
       )}
       {error && (
-        <p role="alert" className="mt-4 rounded-md border border-red-500 p-3 text-sm">
+        <p role="alert" className="mt-4 rounded-card border border-red-300 bg-red-50 p-4 text-sm text-red-800">
           Error: {errorText(error, n)}
         </p>
       )}
 
       {/* ---- Dentists ---- */}
       <section className="mt-8">
-        <h2 className="text-lg font-semibold">Dentists</h2>
+        <h2 className="text-xl font-medium">Dentists</h2>
         <p className="mt-1 text-sm opacity-80">
           Switching a dentist off hides them from the booking form. Their
           existing bookings stay.
         </p>
         <ul className="mt-3 space-y-4">
           {data.dentists.map((d) => (
-            <li key={d.id} className="rounded-md border border-neutral-500/60 p-4">
+            <li key={d.id} className="card p-5">
               <form action={saveDentist} className="space-y-3">
                 <input type="hidden" name="id" value={d.id} />
                 <label className="block text-sm font-medium">
@@ -135,14 +135,14 @@ async function SetupContent({
 
       {/* ---- Services ---- */}
       <section className="mt-10">
-        <h2 className="text-lg font-semibold">Services</h2>
+        <h2 className="text-xl font-medium">Services</h2>
         <p className="mt-1 text-sm opacity-80">
           A new duration applies to new bookings only. Existing bookings keep
           their times.
         </p>
         <ul className="mt-3 space-y-4">
           {data.services.map((s) => (
-            <li key={s.id} className="rounded-md border border-neutral-500/60 p-4">
+            <li key={s.id} className="card p-5">
               <form action={saveService} className="space-y-3">
                 <input type="hidden" name="id" value={s.id} />
                 <label className="block text-sm font-medium">
@@ -162,14 +162,14 @@ async function SetupContent({
 
       {/* ---- Opening hours ---- */}
       <section className="mt-10">
-        <h2 className="text-lg font-semibold">Opening hours</h2>
+        <h2 className="text-xl font-medium">Opening hours</h2>
         <p className="mt-1 text-sm opacity-80">
           New hours apply to new bookings. If a future booking falls outside
           them, it stays, and you must tick the confirm box to save.
         </p>
         <ul className="mt-3 space-y-4">
           {data.hours.map((h) => (
-            <li key={h.id} className="rounded-md border border-neutral-500/60 p-4">
+            <li key={h.id} className="card p-5">
               <p className="font-semibold">
                 {h.dentistName} · {h.branchName}
               </p>

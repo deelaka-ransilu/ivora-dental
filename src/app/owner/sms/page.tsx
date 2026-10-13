@@ -21,10 +21,10 @@ async function SmsLogContent() {
   const rows = await getSmsLog(user);
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6">
+    <main className="mx-auto w-full max-w-3xl px-4 py-6">
       <StaffHeader user={user} />
 
-      <h1 className="mt-6 text-2xl font-bold">SMS sent (simulated)</h1>
+      <h1 className="mt-8 text-3xl font-medium tracking-tight">SMS sent (simulated)</h1>
       <p className="mt-1 text-sm opacity-80">
         Nothing is really sent in this demo. Each row is a message that would
         have gone out. Newest first, latest 200 shown.
@@ -41,7 +41,7 @@ async function SmsLogContent() {
       ) : (
         <ul className="mt-6 space-y-3">
           {rows.map((r) => (
-            <li key={r.id} className="rounded-md border border-neutral-500/60 p-4">
+            <li key={r.id} className="card p-5">
               <p className="text-sm font-semibold">
                 Sent {formatDateTime(r.sentAt)}
               </p>

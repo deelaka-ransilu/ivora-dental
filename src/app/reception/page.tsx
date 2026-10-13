@@ -35,10 +35,10 @@ const ERRORS: Record<string, string> = {
 };
 
 const linkButton =
-  "inline-flex min-h-11 items-center justify-center rounded-md border border-neutral-500/60 px-4 text-base font-medium hover:bg-neutral-500/20";
+  "btn btn-light min-h-11";
 
 const summaryButton =
-  "flex min-h-11 cursor-pointer items-center rounded-md border border-neutral-500/60 px-4 text-base font-medium hover:bg-neutral-500/20";
+  "btn btn-light min-h-11 cursor-pointer";
 
 export default function ReceptionPage({
   searchParams,
@@ -76,10 +76,10 @@ async function ReceptionContent({
   const active = bookings.filter((b) => b.status === "booked");
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6">
+    <main className="mx-auto w-full max-w-3xl px-4 py-6">
       <StaffHeader user={user} />
 
-      <h1 className="mt-6 text-2xl font-bold">Bookings at {branchName}</h1>
+      <h1 className="mt-8 text-3xl font-medium tracking-tight">Bookings at {branchName}</h1>
       <p className="mt-1 text-sm opacity-80">
         {formatDate(colomboToDate(date, "12:00"))}: {active.length} booked
         {bookings.length > active.length
@@ -90,7 +90,7 @@ async function ReceptionContent({
       {added && (
         <p
           role="status"
-          className="mt-4 rounded-md border border-green-600 p-3 text-sm"
+          className="mt-4 rounded-card border border-green-300 bg-green-50 p-4 text-sm text-green-900"
         >
           Booking added.
         </p>
@@ -98,7 +98,7 @@ async function ReceptionContent({
       {moved && (
         <p
           role="status"
-          className="mt-4 rounded-md border border-green-600 p-3 text-sm"
+          className="mt-4 rounded-card border border-green-300 bg-green-50 p-4 text-sm text-green-900"
         >
           Booking moved.
         </p>
@@ -106,7 +106,7 @@ async function ReceptionContent({
       {deleted && (
         <p
           role="status"
-          className="mt-4 rounded-md border border-green-600 p-3 text-sm"
+          className="mt-4 rounded-card border border-green-300 bg-green-50 p-4 text-sm text-green-900"
         >
           Patient data deleted.
         </p>
@@ -114,7 +114,7 @@ async function ReceptionContent({
       {error && ERRORS[error] && (
         <p
           role="alert"
-          className="mt-4 rounded-md border border-red-500 p-3 text-sm"
+          className="mt-4 rounded-card border border-red-300 bg-red-50 p-4 text-sm text-red-800"
         >
           Error: {ERRORS[error]}
         </p>
@@ -122,7 +122,7 @@ async function ReceptionContent({
 
       <a
         href="/reception/new"
-        className="mt-4 flex min-h-11 items-center justify-center rounded-md bg-primary px-4 font-semibold text-primary-foreground hover:bg-primary-hover"
+        className="btn btn-dark mt-4 min-h-11 w-full"
       >
         Add a booking (phone or walk-in)
       </a>
@@ -153,12 +153,12 @@ async function ReceptionContent({
             name="date"
             required
             defaultValue={date}
-            className="mt-1 block min-h-11 rounded-md border border-neutral-500 bg-white px-3 text-black"
+            className="mt-1.5 block min-h-11 rounded-xl border border-line bg-surface px-3 text-foreground"
           />
         </label>
         <button
           type="submit"
-          className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground hover:bg-primary-hover"
+          className="btn btn-dark min-h-11"
         >
           Show bookings
         </button>
@@ -171,13 +171,13 @@ async function ReceptionContent({
           {bookings.map((b) => (
             <li
               key={b.id}
-              className="rounded-md border border-neutral-500/60 p-4"
+              className="card p-5"
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <p className="text-lg font-semibold">
                   {formatTime(b.startAt)} to {formatTime(b.endAt)}
                 </p>
-                <p className="text-sm font-medium">
+                <p className="chip text-sm font-medium">
                   {b.status === "booked" ? "Booked" : "Cancelled"}
                 </p>
               </div>
@@ -211,7 +211,7 @@ async function ReceptionContent({
                       </p>
                       <button
                         type="submit"
-                        className="min-h-11 rounded-md bg-red-700 px-4 font-semibold text-white"
+                        className="btn min-h-11 bg-red-700 text-white hover:bg-red-800"
                       >
                         Yes, cancel this booking
                       </button>
@@ -231,7 +231,7 @@ async function ReceptionContent({
                   </p>
                   <button
                     type="submit"
-                    className="min-h-11 rounded-md bg-red-700 px-4 font-semibold text-white"
+                    className="btn min-h-11 bg-red-700 text-white hover:bg-red-800"
                   >
                     Yes, delete this patient&apos;s data
                   </button>
