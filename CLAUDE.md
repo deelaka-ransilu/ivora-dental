@@ -264,15 +264,15 @@ Done:
 - Reception list and cancel (R2, part of R1): `src/db/reception.ts` (`getBranchBookings`, `getOwnBranchName`, `cancelBranchBooking`), `/reception`.
 - Reception add-booking for phone and walk-in (rest of R1 add): `src/db/reception-create.ts` (`createBranchBooking`, own branch only, `minNoticeMinutes: 0`, no SMS) and `/reception/new`. Tested and live (commit `5608e9d`).
 - Phase 2 (tested and live, commit `68a2cf1`): Poppins (via `next/font/google` in `src/app/layout.tsx`), light theme only (white background, dark text, one primary blue token `--primary` in `src/app/globals.css`), and the hairline `Settle` figure on the landing page (`src/components/LandingSettle.tsx`). `@lucasmarkes/hairline` is the only extra UI library.
+- Phase 3 (tested and live, commit `5e28d26`): receptionist move booking and delete patient data (rest of R1, R3). `moveBranchBooking` changes the times of the existing booking in one update (same service, same dentist, own branch, no notice rule, no SMS), screen at `/reception/move`. `deleteBranchPatient` deletes the patient (bookings and SMS rows cascade) and refuses if the patient also has bookings at another branch. Both live in `src/db/reception.ts`, with actions in `src/app/reception/actions.ts`. No migration was needed.
 
 Still to check on the live site: sign-out, and the wrong-role bounce (manual test 6).
 
 **Open items, in the agreed order:**
-1. Receptionist move booking and delete patient data (rest of R1, R3).
-2. Dentist view (D1 to D3). If time is short, cut this first.
-3. Owner screens: dentists, services, hours, closures, SMS log (O1 to O4).
-4. Run the full manual tests on the live site.
-5. README with screenshots, the "What I'd add for a real client" section, and a clear "concept project, fictional data" label.
+1. Dentist view (D1 to D3). If time is short, cut this first.
+2. Owner screens: dentists, services, hours, closures, SMS log (O1 to O4).
+3. Run the full manual tests on the live site.
+4. README with screenshots, the "What I'd add for a real client" section, and a clear "concept project, fictional data" label.
 
 **Open questions:** one chair per dentist (unconfirmed); plain Tailwind vs a component library; time budget for the build (estimate 25 to 35 hours with AI help).
 
