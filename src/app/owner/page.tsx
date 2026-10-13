@@ -249,6 +249,9 @@ async function OwnerContent({
       <a href="/owner/sms" className="mt-2 inline-flex min-h-11 items-center underline">
         View SMS log (simulated)
       </a>
+      <a href="/owner/staff" className="mt-2 ml-4 inline-flex min-h-11 items-center underline">
+        Staff logins
+      </a>
       <a href="/owner/setup" className="mt-2 ml-4 inline-flex min-h-11 items-center underline">
         Setup: dentists, services, hours
       </a>
@@ -629,8 +632,7 @@ async function OwnerContent({
         <ComingSoon
           title="Still to build"
           items={[
-            "Set up branches, dentists, services and opening hours (O2)",
-            "Create and remove staff logins (O4)",
+            "Create and remove staff logins from the browser (for a real client, see README)",
           ]}
         />
       </div>
