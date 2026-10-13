@@ -37,7 +37,7 @@ const ERRORS: Record<string, string> = {
 const inputClass =
   "mt-1 block min-h-11 w-full rounded-md border border-neutral-500 bg-white px-3 text-black";
 const buttonClass =
-  "min-h-11 w-full rounded-md bg-blue-600 px-4 font-semibold text-white";
+  "min-h-11 w-full rounded-md bg-primary px-4 font-semibold text-primary-foreground hover:bg-primary-hover";
 
 export default function NewBookingPage({
   searchParams,
@@ -205,7 +205,7 @@ async function NewBookingContent({
                       required
                       className="peer sr-only"
                     />
-                    <span className="flex min-h-11 flex-col justify-center rounded-md border border-neutral-500 px-3 py-1 text-sm peer-checked:border-blue-500 peer-checked:bg-blue-600 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-blue-400">
+                    <span className="flex min-h-11 flex-col justify-center rounded-md border border-neutral-500 px-3 py-1 text-sm peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-primary">
                       <span className="font-semibold">
                         {formatTime(s.startAt)}
                       </span>

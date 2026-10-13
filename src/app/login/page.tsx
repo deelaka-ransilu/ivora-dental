@@ -45,7 +45,7 @@ export default function LoginPage({
             <input type="hidden" name="who" value={b.who} />
             <button
               type="submit"
-              className="min-h-11 w-full rounded-md bg-blue-700 px-4 py-2 text-base font-medium text-white hover:bg-blue-800"
+              className="min-h-11 w-full rounded-md bg-primary px-4 py-2 text-base font-medium text-primary-foreground hover:bg-primary-hover"
             >
               {b.label}
             </button>

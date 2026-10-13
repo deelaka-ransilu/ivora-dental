@@ -81,7 +81,7 @@ async function ReceptionContent({
 
       <a
         href="/reception/new"
-        className="mt-4 flex min-h-11 items-center justify-center rounded-md bg-blue-600 px-4 font-semibold text-white"
+        className="mt-4 flex min-h-11 items-center justify-center rounded-md bg-primary px-4 font-semibold text-primary-foreground hover:bg-primary-hover"
       >
         Add a booking (phone or walk-in)
       </a>
@@ -117,7 +117,7 @@ async function ReceptionContent({
         </label>
         <button
           type="submit"
-          className="min-h-11 rounded-md bg-blue-600 px-4 font-semibold text-white"
+          className="min-h-11 rounded-md bg-primary px-4 font-semibold text-primary-foreground hover:bg-primary-hover"
         >
           Show bookings
         </button>

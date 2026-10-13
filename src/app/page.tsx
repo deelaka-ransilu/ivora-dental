@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LandingSettle from "@/components/LandingSettle";
 
 export default function HomePage() {
   return (
@@ -15,7 +16,7 @@ export default function HomePage() {
       <div className="mt-8 flex flex-col gap-4 sm:flex-row">
         <Link
           href="/book"
-          className="flex min-h-11 items-center justify-center rounded-md bg-blue-700 px-6 py-2 text-base font-medium text-white hover:bg-blue-800"
+          className="flex min-h-11 items-center justify-center rounded-md bg-primary px-6 py-2 text-base font-medium text-primary-foreground hover:bg-primary-hover"
         >
           Book now
         </Link>
@@ -26,6 +27,8 @@ export default function HomePage() {
           Staff demo sign in
         </Link>
       </div>
+
+      <LandingSettle />
     </main>
   );
 }
