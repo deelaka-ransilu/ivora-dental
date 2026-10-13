@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth";
 import StaffHeader from "@/components/StaffHeader";
-import ComingSoon from "@/components/ComingSoon";
 import { getAllBranches, getWeekBookings, type OwnerBooking } from "@/db/owner";
 import {
   countOverlappingBookings,
@@ -628,14 +627,6 @@ async function OwnerContent({
         )}
       </section>
 
-      <div className="mt-8">
-        <ComingSoon
-          title="Still to build"
-          items={[
-            "Create and remove staff logins from the browser (for a real client, see README)",
-          ]}
-        />
-      </div>
     </main>
   );
 }
