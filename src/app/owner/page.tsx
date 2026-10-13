@@ -249,6 +249,9 @@ async function OwnerContent({
       <a href="/owner/sms" className="mt-2 inline-flex min-h-11 items-center underline">
         View SMS log (simulated)
       </a>
+      <a href="/owner/setup" className="mt-2 ml-4 inline-flex min-h-11 items-center underline">
+        Setup: dentists, services, hours
+      </a>
       <p className="mt-1 text-sm opacity-80">
         Week of {formatDate(colomboToDate(weekStart, "12:00"))} to{" "}
         {formatDate(colomboToDate(weekEnd, "12:00"))}: {active.length} booked
