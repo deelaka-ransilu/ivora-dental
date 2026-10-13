@@ -1,21 +1,28 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { demoSignIn } from "./demo-actions";
 
 const DEMO_BUTTONS = [
   {
     who: "owner",
+    role: "Owner",
     label: "Sign in as Owner",
     hint: "All branches, staff and settings",
+    tint: "bg-tint-sky",
   },
   {
     who: "reception",
+    role: "Receptionist",
     label: "Sign in as Receptionist (Negombo)",
     hint: "Bookings for the Negombo branch only",
+    tint: "bg-tint-sage",
   },
   {
     who: "dentist",
+    role: "Dr. Fernando",
     label: "Sign in as Dr. Fernando",
     hint: "Read-only view of his own bookings",
+    tint: "bg-tint-lilac",
   },
 ];
 
@@ -29,9 +36,15 @@ export default function LoginPage({
   searchParams: SearchParams;
 }) {
   return (
-    <main className="mx-auto max-w-md px-4 py-10">
-      <h1 className="text-2xl font-semibold">Staff sign in</h1>
-      <p className="mt-2 text-sm opacity-80">
+    <main className="mx-auto w-full max-w-4xl px-4 py-10">
+      <Link href="/" className="text-sm text-muted hover:text-foreground">
+        ← Back to home
+      </Link>
+
+      <h1 className="mt-6 text-3xl font-medium tracking-tight sm:text-4xl">
+        Staff sign in
+      </h1>
+      <p className="mt-2 max-w-md text-base text-muted">
         This is a demo with fictional data. Pick a role to look around.
       </p>
 
@@ -39,17 +52,25 @@ export default function LoginPage({
         <LoginError searchParams={searchParams} />
       </Suspense>
 
-      <div className="mt-6 space-y-4">
+      <div className="mt-8 grid gap-4 md:grid-cols-3">
         {DEMO_BUTTONS.map((b) => (
-          <form key={b.who} action={demoSignIn}>
+          <form
+            key={b.who}
+            action={demoSignIn}
+            className={`${b.tint} flex min-h-52 flex-col justify-between rounded-card p-6`}
+          >
             <input type="hidden" name="who" value={b.who} />
+            <div>
+              <h2 className="text-xl font-medium">{b.role}</h2>
+              <p className="mt-2 text-sm text-muted">{b.hint}</p>
+            </div>
             <button
               type="submit"
-              className="min-h-11 w-full rounded-md bg-primary px-4 py-2 text-base font-medium text-primary-foreground hover:bg-primary-hover"
+              aria-label={b.label}
+              className="btn btn-dark mt-6 min-h-11 w-full"
             >
-              {b.label}
+              Sign in <span aria-hidden>→</span>
             </button>
-            <p className="mt-1 text-sm opacity-70">{b.hint}</p>
           </form>
         ))}
       </div>
@@ -69,7 +90,7 @@ async function LoginError({ searchParams }: { searchParams: SearchParams }) {
   return (
     <p
       role="alert"
-      className="mt-4 rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-800"
+      className="mt-6 rounded-card border border-red-300 bg-red-50 p-4 text-sm text-red-800"
     >
       {message}
     </p>
