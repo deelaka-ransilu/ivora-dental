@@ -109,11 +109,13 @@ export async function getBookingOptions(): Promise<BookingOptions> {
 
 // Free start times for one date, branch and service (optionally one dentist).
 // Returns [] for anything invalid or not bookable.
+// minNoticeMinutes: leave out for online bookings (2 hours). Reception passes 0.
 export async function getAvailableSlots(input: {
   isoDate: string;
   branchId: string;
   serviceId: string;
   dentistId?: string | null;
+  minNoticeMinutes?: number;
 }): Promise<AvailableSlot[]> {
   const { isoDate, branchId, serviceId } = input;
   const dentistId = input.dentistId || null;
@@ -226,6 +228,7 @@ export async function getAvailableSlots(input: {
     hours,
     appointments,
     blocked,
+    minNoticeMinutes: input.minNoticeMinutes,
   }).map((s) => ({
     ...s,
     dentistName: dentistNames.get(s.dentistId) ?? "",

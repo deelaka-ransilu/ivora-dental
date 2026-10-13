@@ -72,6 +72,8 @@ function overlaps(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date): boolean {
 // All free start times on one Colombo date, one entry per dentist per start time.
 // `hours` must already be limited to the chosen branch, the chosen dentist (if any),
 // dentists who offer the service, and this date's weekday.
+// minNoticeMinutes: how far ahead a start time must be. Online bookings use the
+// default (MIN_NOTICE_HOURS). Reception passes 0 (anything from now onwards).
 export function generateSlots(input: {
   isoDate: string;
   branchId: string;
@@ -79,12 +81,14 @@ export function generateSlots(input: {
   hours: WorkingHours[];
   appointments: BusyRange[];
   blocked: BlockedRange[];
+  minNoticeMinutes?: number;
   now?: Date;
 }): Slot[] {
   const now = input.now ?? new Date();
   if (!isDateBookable(input.isoDate, now)) return [];
 
-  const earliest = new Date(now.getTime() + MIN_NOTICE_HOURS * 60 * 60 * 1000);
+  const noticeMinutes = input.minNoticeMinutes ?? MIN_NOTICE_HOURS * 60;
+  const earliest = new Date(now.getTime() + noticeMinutes * 60 * 1000);
   const slots: Slot[] = [];
 
   for (const h of input.hours) {

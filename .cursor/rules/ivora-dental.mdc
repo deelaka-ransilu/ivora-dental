@@ -1,0 +1,20 @@
+---
+description: Ivora Dental working rules (always apply)
+alwaysApply: true
+---
+# Ivora Dental rules
+
+- Read CLAUDE.md first. It is the source of truth for requirements, architecture and data model.
+- Read PROJECT-GUIDE.md for current status and the build plan. Appendix A is the project handoff.
+- Work one step at a time. After each step, stop and wait for my result.
+- Read a file fully before changing it. Never change a method's internals without seeing the actual file.
+- Simplest, most conservative option. No new libraries or abstractions without asking. Exception: @lucasmarkes/hairline is approved.
+- Never open, print, or ask me to paste secrets. Do not touch .env* files.
+- Do not run these yourself: git commit, git push, npm run seed, npm audit fix --force. Ask first for any other terminal command.
+- All database access is server-side. No RLS policies. Access control lives in requireRole() and src/db/ functions.
+- Time is stored as timestamptz and converted to Asia/Colombo only in src/lib/format.ts. Booking rules live in src/lib/rules.ts.
+- Schema changes only via migrations. Demo-only code stays in clearly named files.
+- Use fake test data only, for example phone 0770000999.
+- When a screen is done, tell me exactly what to click to test it. Say plainly when something is untested. Do not describe a proposal as built.
+- Keep replies short. End with a list of the files you changed.
+- When a feature is tested and working, update the status in CLAUDE.md.

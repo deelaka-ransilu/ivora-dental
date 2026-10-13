@@ -47,6 +47,7 @@ async function ReceptionContent({
 
   const p = await searchParams;
   const raw = Array.isArray(p.date) ? (p.date[0] ?? "") : (p.date ?? "");
+  const added = (Array.isArray(p.added) ? p.added[0] : p.added) === "1";
   const today = colomboDateString();
   const date = isColomboDate(raw) ? raw : today;
 
@@ -68,6 +69,22 @@ async function ReceptionContent({
           ? `, ${bookings.length - active.length} cancelled`
           : ""}
       </p>
+
+      {added && (
+        <p
+          role="status"
+          className="mt-4 rounded-md border border-green-600 p-3 text-sm"
+        >
+          Booking added.
+        </p>
+      )}
+
+      <a
+        href="/reception/new"
+        className="mt-4 flex min-h-11 items-center justify-center rounded-md bg-blue-600 px-4 font-semibold text-white"
+      >
+        Add a booking (phone or walk-in)
+      </a>
 
       <div className="mt-4 flex flex-wrap items-end gap-3">
         <a
