@@ -263,6 +263,7 @@ Done:
 - Public patient booking (`/book`, P1 to P6): `src/lib/format.ts`, `src/lib/rules.ts`, `src/db/booking.ts` (`getBookingOptions`, `getAvailableSlots`). `generateSlots` / `getAvailableSlots` take optional `minNoticeMinutes` (default is the 2-hour online notice).
 - Reception list and cancel (R2, part of R1): `src/db/reception.ts` (`getBranchBookings`, `getOwnBranchName`, `cancelBranchBooking`), `/reception`.
 - Reception add-booking for phone and walk-in (rest of R1 add): `src/db/reception-create.ts` (`createBranchBooking`, own branch only, `minNoticeMinutes: 0`, no SMS) and `/reception/new`. Tested and live (commit `5608e9d`).
+- Phase 2 (tested and live, commit `68a2cf1`): Poppins (via `next/font/google` in `src/app/layout.tsx`), light theme only (white background, dark text, one primary blue token `--primary` in `src/app/globals.css`), and the hairline `Settle` figure on the landing page (`src/components/LandingSettle.tsx`). `@lucasmarkes/hairline` is the only extra UI library.
 
 Still to check on the live site: sign-out, and the wrong-role bounce (manual test 6).
 
