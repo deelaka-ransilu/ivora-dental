@@ -2,31 +2,165 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth";
 import StaffHeader from "@/components/StaffHeader";
-import ComingSoon from "@/components/ComingSoon";
+import { getBranchBookings, getOwnBranchName } from "@/db/reception";
+import { cancelBooking } from "./actions";
+import {
+  addDaysToColomboDate,
+  colomboDateString,
+  colomboToDate,
+  formatDate,
+  formatTime,
+  isColomboDate,
+} from "@/lib/format";
 
 export const metadata: Metadata = { title: "Reception" };
 
-export default function ReceptionPage() {
+type Params = Record<string, string | string[] | undefined>;
+
+const SOURCE_LABEL = {
+  online: "Online",
+  phone: "Phone",
+  walk_in: "Walk-in",
+} as const;
+
+const linkButton =
+  "inline-flex min-h-11 items-center justify-center rounded-md border border-neutral-500/60 px-4 text-base font-medium hover:bg-neutral-500/20";
+
+export default function ReceptionPage({
+  searchParams,
+}: {
+  searchParams: Promise<Params>;
+}) {
   return (
     <Suspense fallback={<p className="p-4">Loading...</p>}>
-      <ReceptionContent />
+      <ReceptionContent searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function ReceptionContent() {
+async function ReceptionContent({
+  searchParams,
+}: {
+  searchParams: Promise<Params>;
+}) {
   const user = await requireRole(["receptionist"]);
+
+  const p = await searchParams;
+  const raw = Array.isArray(p.date) ? (p.date[0] ?? "") : (p.date ?? "");
+  const today = colomboDateString();
+  const date = isColomboDate(raw) ? raw : today;
+
+  const [branchName, bookings] = await Promise.all([
+    getOwnBranchName(user),
+    getBranchBookings(user, date),
+  ]);
+
+  const active = bookings.filter((b) => b.status === "booked");
+
   return (
     <main className="mx-auto max-w-3xl px-4 py-6">
       <StaffHeader user={user} />
-      <ComingSoon
-        title="Reception dashboard"
-        items={[
-          "List bookings by date for your own branch",
-          "Add, move or cancel bookings",
-          "Delete a patient's data on request",
-        ]}
-      />
+
+      <h1 className="mt-6 text-2xl font-bold">Bookings at {branchName}</h1>
+      <p className="mt-1 text-sm opacity-80">
+        {formatDate(colomboToDate(date, "12:00"))}: {active.length} booked
+        {bookings.length > active.length
+          ? `, ${bookings.length - active.length} cancelled`
+          : ""}
+      </p>
+
+      <div className="mt-4 flex flex-wrap items-end gap-3">
+        <a
+          href={`/reception?date=${addDaysToColomboDate(date, -1)}`}
+          className={linkButton}
+        >
+          Previous day
+        </a>
+        <a href="/reception" className={linkButton}>
+          Today
+        </a>
+        <a
+          href={`/reception?date=${addDaysToColomboDate(date, 1)}`}
+          className={linkButton}
+        >
+          Next day
+        </a>
+      </div>
+
+      <form method="get" action="/reception" className="mt-3 flex flex-wrap items-end gap-3">
+        <label className="text-sm font-medium">
+          Pick a date
+          <input
+            type="date"
+            name="date"
+            required
+            defaultValue={date}
+            className="mt-1 block min-h-11 rounded-md border border-neutral-500 bg-white px-3 text-black"
+          />
+        </label>
+        <button
+          type="submit"
+          className="min-h-11 rounded-md bg-blue-600 px-4 font-semibold text-white"
+        >
+          Show bookings
+        </button>
+      </form>
+
+      {bookings.length === 0 ? (
+        <p className="mt-6 text-sm">No bookings at this branch on this day.</p>
+      ) : (
+        <ul className="mt-6 space-y-3">
+          {bookings.map((b) => (
+            <li
+              key={b.id}
+              className="rounded-md border border-neutral-500/60 p-4"
+            >
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <p className="text-lg font-semibold">
+                  {formatTime(b.startAt)} to {formatTime(b.endAt)}
+                </p>
+                <p className="text-sm font-medium">
+                  {b.status === "booked" ? "Booked" : "Cancelled"}
+                </p>
+              </div>
+              <p className="mt-1 font-medium">{b.patientName}</p>
+              <p className="mt-1">
+                <a
+                  href={`tel:${b.patientPhone}`}
+                  className="inline-flex min-h-11 items-center underline"
+                >
+                  {b.patientPhone}
+                </a>
+              </p>
+              <p className="text-sm opacity-80">
+                {b.serviceName} with {b.dentistName} ({SOURCE_LABEL[b.source]})
+              </p>
+
+              {b.status === "booked" && (
+                <details className="mt-3">
+                  <summary className="flex min-h-11 cursor-pointer items-center rounded-md border border-neutral-500/60 px-4 text-base font-medium hover:bg-neutral-500/20">
+                    Cancel booking
+                  </summary>
+                  <form action={cancelBooking} className="mt-2">
+                    <input type="hidden" name="id" value={b.id} />
+                    <input type="hidden" name="date" value={date} />
+                    <p className="mb-2 text-sm">
+                      Cancel the booking for {b.patientName} at{" "}
+                      {formatTime(b.startAt)}? The time becomes free again.
+                    </p>
+                    <button
+                      type="submit"
+                      className="min-h-11 rounded-md bg-red-700 px-4 font-semibold text-white"
+                    >
+                      Yes, cancel this booking
+                    </button>
+                  </form>
+                </details>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </main>
   );
 }
