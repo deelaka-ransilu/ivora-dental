@@ -258,18 +258,20 @@ Done:
 - Project created, Supabase project created and linked, migrations 1 to 7 pushed.
 - `scripts/seed.ts` written and run successfully (3 branches, 5 dentists, 5 services, 5 logins, 12 patients, 49 appointments, 17 simulated SMS), data checked in the Supabase dashboard.
 - Repo on GitHub, Vercel deployed from `main`, the three environment variables set in Vercel.
-- Server client, auth helpers, demo sign-in and sign-out, login page, demo banner, landing page, and placeholder pages for `/owner`, `/reception`, `/dentist` and `/book`.
+- Server client, auth helpers, demo sign-in and sign-out, login page, demo banner, landing page. `/owner` and `/dentist` are still placeholders.
 - Role guard checked locally (wrong role and signed-out visits bounce to `/login`). On the live site, sign-in works for all three demo roles.
+- Public patient booking (`/book`, P1 to P6): `src/lib/format.ts`, `src/lib/rules.ts`, `src/db/booking.ts` (`getBookingOptions`, `getAvailableSlots`). `generateSlots` / `getAvailableSlots` take optional `minNoticeMinutes` (default is the 2-hour online notice).
+- Reception list and cancel (R2, part of R1): `src/db/reception.ts` (`getBranchBookings`, `getOwnBranchName`, `cancelBranchBooking`), `/reception`.
+- Reception add-booking for phone and walk-in (rest of R1 add): `src/db/reception-create.ts` (`createBranchBooking`, own branch only, `minNoticeMinutes: 0`, no SMS) and `/reception/new`. Tested and live (commit `5608e9d`).
 
 Still to check on the live site: sign-out, and the wrong-role bounce (manual test 6).
 
 **Open items, in the agreed order:**
-1. Patient booking page (P1 to P6) with slot generation in `lib/rules.ts` and Colombo-time helpers in `lib/format.ts`.
-2. Receptionist dashboard (R1 to R3).
-3. Dentist view (D1 to D3). If time is short, cut this first.
-4. Owner screens: dentists, services, hours, closures, SMS log (O1 to O4).
-5. Run the full manual tests on the live site.
-6. README with screenshots, the "What I'd add for a real client" section, and a clear "concept project, fictional data" label.
+1. Receptionist move booking and delete patient data (rest of R1, R3).
+2. Dentist view (D1 to D3). If time is short, cut this first.
+3. Owner screens: dentists, services, hours, closures, SMS log (O1 to O4).
+4. Run the full manual tests on the live site.
+5. README with screenshots, the "What I'd add for a real client" section, and a clear "concept project, fictional data" label.
 
 **Open questions:** one chair per dentist (unconfirmed); plain Tailwind vs a component library; time budget for the build (estimate 25 to 35 hours with AI help).
 
