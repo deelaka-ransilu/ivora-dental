@@ -5,7 +5,7 @@ A booking and scheduling web app for a fictional dental clinic with 3 branches (
 The app is deployed publicly with seeded dummy data. Anyone can open it and try it.
 
 - Repo: `deelaka-ransilu/ivora-dental` (public), https://github.com/deelaka-ransilu/ivora-dental, branch `main`
-- Live site: `TODO` (Vercel URL, fill in once the first real deploy is confirmed)
+- Live site: https://ivora-dental.vercel.app (Vercel, auto-deploys on every push to `main`)
 - Local folder: `E:\1-Active\ivora-dental` (Windows, PowerShell 7, VS Code)
 - Origin: this started as a client-quote role-play. The requirements below came from it. Contract terms, PDPA clauses, support tiers and hosting-in-client's-name are **not** part of this build.
 
@@ -29,12 +29,12 @@ The app is deployed publicly with seeded dummy data. Anyone can open it and try 
 
 | Area | Choice |
 |---|---|
-| Framework | Next.js 16 (App Router), TypeScript, **server rendering** (not a static export), `src/` directory, `@/*` import alias |
+| Framework | Next.js 16 (App Router), TypeScript, **server rendering** (not a static export), `src/` directory, `@/*` import alias. **Cache Components and Partial Prefetching are enabled** (see "Next.js rules") |
 | Styling | Tailwind CSS v4. Plain components first; add a component library only if the owner agrees |
 | Database | PostgreSQL on Supabase (free tier), project `ivora-dental`, Asia-Pacific region |
 | Migrations | **Supabase CLI** (dev dependency, run with `npx supabase`), plain SQL files in `supabase/migrations/` (see "Migrations") |
 | DB access | `@supabase/supabase-js` on the **server only**, using the **new secret key** (`sb_secret_...`) |
-| Auth | Supabase Auth (email + password). Demo sign-in buttons for the three roles |
+| Auth | Supabase Auth (email + password), with our own cookie session (see "Auth and sessions"). No `@supabase/ssr`. Demo sign-in buttons for the three roles |
 | Hosting | Vercel (app) + Supabase (database) |
 | SMS | **Simulated.** Messages are written to `sms_log`, shown in the admin as "SMS sent (simulated)". No provider |
 | Dev tools | `tsx` (runs `scripts/seed.ts`) |
@@ -43,7 +43,7 @@ The app is deployed publicly with seeded dummy data. Anyone can open it and try 
 
 **Keys:** use the new API keys only. The secret key goes in `SUPABASE_SECRET_KEY`. Ignore the legacy `anon` / `service_role` tab. The publishable key is not used anywhere in this app.
 
-**Environment variables** (in `.env.local`, which is git-ignored, and in Vercel project settings):
+**Environment variables** (in `.env.local`, which is git-ignored, and in Vercel project settings; all three are set in both):
 
 | Name | Used by |
 |---|---|
@@ -84,39 +84,66 @@ There is no test suite. `npm run build` (which runs the TypeScript check) is the
 
 1. `20261012142704_extensions_and_enums`: `btree_gist` (in the `extensions` schema), enums `user_role` (`owner`, `receptionist`, `dentist`) and `appointment_status` (`booked`, `cancelled`).
 2. `20261012143058_core_tables`: `branches`, `dentists`, `services` (duration > 0 and a multiple of 5), `dentist_services`, `dentist_branch_hours` (`day_of_week` 0 = Sunday, local `time` columns). `is_active` is used instead of deleting.
-3. `20261012143137_profiles`: `id` = the Supabase Auth user id; `role`, `branch_id`, `dentist_id` (unique), `is_active`. A check constraint ties the role to its branch/dentist links.
+3. `20261012143137_profiles`: `id` = the Supabase Auth user id; `full_name`, `role`, `branch_id`, `dentist_id` (unique), `is_active`. A check constraint ties the role to its branch/dentist links.
 4. `20261012143212_patients_and_appointments`: `patients` (name, phone, consent timestamp), `appointments`, with the exclusion constraint `appointments_no_dentist_overlap`. Deleting a patient cascades to their appointments.
 5. `20261012143251_blocked_times`: exactly one of `branch_id` or `dentist_id`, a time range, a reason.
 6. `20261012143351_sms_log`: `appointment_id` (cascade), `to_phone`, `message`.
 7. `20261012143458_rls_and_grants`: RLS enabled on all 10 tables with no policies; all privileges revoked from `anon` and `authenticated`; usage and all on tables granted to `service_role`.
 
+## Auth and sessions
+
+We do not use `@supabase/ssr`. The approach is deliberately small:
+
+1. The demo login server action calls Supabase `signInWithPassword` on the server and stores the access token in an httpOnly cookie named `ivora_session` (secure in production, sameSite lax, maxAge = the token's `expires_in`, about one hour).
+2. `requireRole()` reads the cookie, validates the token with Supabase, loads the `profiles` row, and requires `is_active`.
+3. There is **no refresh**. When the session expires, the visitor clicks a demo button again.
+4. Not signed in, or the wrong role, redirects to `/login`. (A friendlier "not allowed" page could come later.)
+5. **Sign-in uses a separate throwaway Supabase client on purpose.** Signing in on the shared secret-key client would make it act as that user and lose its database access ("permission denied"). Never call `signInWithPassword` on the client from `getSupabase()`.
+
+`src/lib/auth.ts` exports: `Role`, `CurrentUser` (`id`, `fullName`, `role`, `branchId`, `dentistId`), `signInWithPassword(email, password)`, `setSession`, `clearSession` (server actions or route handlers only), `getCurrentUser()` (cached per request; null if no cookie, bad token, missing profile or inactive), and `requireRole(allowed: Role[])`.
+
+## Next.js rules (Cache Components on)
+
+The build log says "Cache Components enabled" and "Partial Prefetching enabled". Consequences:
+
+- Anything that reads cookies or `searchParams` is request-time data. It must sit inside a `<Suspense>` boundary, in a child component. The page itself stays a sync component that returns `<Suspense fallback={...}><Content /></Suspense>`, and `Content` is the async component that calls `requireRole()` or `getCurrentUser()`.
+- The layout must not read cookies outside a Suspense boundary. The demo banner is static, so that is fine.
+- In the build output, `◐` means partial prerender (static shell plus streamed dynamic content). That is expected for `/login`, `/owner`, `/reception` and `/dentist`.
+- Check the Next.js 16 docs for the current rules rather than guessing.
+
 ## Project structure
 
-Exists now: `supabase/migrations/`, `scripts/seed.ts`, and the create-next-app skeleton in `src/app`. Everything else under `src/` below is **planned, not built.** Update this section as files are created.
+Built is marked **built**. Everything else is **planned, not built.** Update this section as files are created.
 
 ```
 supabase/
   config.toml
-  migrations/               the schema, as SQL files (see "Migrations")
+  migrations/               the schema, as SQL files (built)
 scripts/
-  seed.ts                   wipes and re-inserts dummy data. Demo only
+  seed.ts                   wipes and re-inserts dummy data. Demo only (built)
 src/
   app/
-    layout.tsx
-    page.tsx                simple landing page: what this is, link to booking, demo sign-in
-    book/page.tsx           public patient booking page
-    login/page.tsx          sign-in with the three demo buttons
-    dashboard/              receptionist and owner screens (role-checked)
-    dentist/page.tsx        dentist read-only view
-    admin/                  owner only: dentists, services, hours, closures, SMS log
-  components/               shared UI
+    layout.tsx              built: page title, demo banner
+    page.tsx                built: simple landing page (what this is, link to booking, demo sign-in)
+    actions.ts              built: sign-out server action
+    book/page.tsx           placeholder: public patient booking page, not built
+    login/page.tsx          built: three demo buttons
+    login/demo-actions.ts   built, DEMO ONLY: demo sign-in server action
+    owner/page.tsx          placeholder: owner screens, not built
+    reception/page.tsx      placeholder: receptionist dashboard, not built
+    dentist/page.tsx        placeholder: dentist read-only view, not built
+  components/
+    ComingSoon.tsx          built: the "placeholder, not built yet" box
+    StaffHeader.tsx         built: "Signed in as" bar with Sign out
   lib/
-    supabase-server.ts      the ONLY place the secret-key client is created
-    auth.ts                 current user and role, requireRole()
-    rules.ts                booking rules: notice period, slot generation, closures
-    format.ts               dates in Asia/Colombo, phone formatting
-  db/                       small query functions. Screens call these, not supabase directly
+    supabase-server.ts      built: the ONLY place the secret-key client is created
+    auth.ts                 built: current user and role, requireRole(), session cookie
+    rules.ts                file created; booking rules (notice period, slots, closures) not built yet
+    format.ts               file created; Colombo-time formatting helpers not built yet
+  db/                       planned: small query functions. Screens call these, not supabase directly
 ```
+
+The owner, reception and dentist pages are **placeholders** that only prove sign-in and the role guard work. They show no real data yet.
 
 ## Architecture rules
 
@@ -196,7 +223,7 @@ Locked. A feature is IN only if it is on this list. Everything else is OUT or LA
 - **Sign-in:** the login page has three buttons: **Owner**, **Receptionist (Negombo)** and **Dr. Fernando**. Each signs in as a seeded Supabase Auth user. The accounts only hold fictional data. This is a convenience for visitors, not security. The password is `DEMO_PASSWORD`, used only on the server by the demo login buttons; it is not shown anywhere on the site.
 - **Banner:** every page shows "Demo with fictional data. Please don't enter real details." The booking form shows it too.
 - **Seed data** (`scripts/seed.ts`), what it creates:
-  - 3 branches and 5 dentists. Dr. Anura Fernando works at Negombo and Colombo 7. The others are Silva, Jayawardena, Wickramasinghe and Rajapaksa.
+  - 3 branches and 5 dentists. Dr. Anura Fernando works at Negombo and Colombo 7. The others are Silva, Jayawardena, Wickramasinghe and Rajapaksa. The owner is Dr. Nirmala Perera.
   - 5 services: Consultation, Check-up, Cleaning, Treatment, Follow-up visit. Plus weekly working hours.
   - 5 logins, all `@ivora-demo.test`: `owner`, `reception.colombo`, `reception.nugegoda`, `reception.negombo`, `fernando`.
   - 12 fake patients (fake `077000xxxx` numbers), one Nugegoda closure about 3 days out, appointments from yesterday to +5 days (one cancelled), and simulated SMS rows for online bookings.
@@ -227,20 +254,24 @@ Simple and clean. No design system decided yet.
 
 ## Status
 
-Done: project created, Supabase project created and linked, migrations 1 to 7 pushed, `scripts/seed.ts` written and run successfully (3 branches, 5 dentists, 5 services, 5 logins, 12 patients, 49 appointments, 17 simulated SMS), data checked in the Supabase dashboard, repo pushed to GitHub, Vercel project imported from GitHub.
+Done:
+- Project created, Supabase project created and linked, migrations 1 to 7 pushed.
+- `scripts/seed.ts` written and run successfully (3 branches, 5 dentists, 5 services, 5 logins, 12 patients, 49 appointments, 17 simulated SMS), data checked in the Supabase dashboard.
+- Repo on GitHub, Vercel deployed from `main`, the three environment variables set in Vercel.
+- Server client, auth helpers, demo sign-in and sign-out, login page, demo banner, landing page, and placeholder pages for `/owner`, `/reception`, `/dentist` and `/book`.
+- Role guard checked locally (wrong role and signed-out visits bounce to `/login`). On the live site, sign-in works for all three demo roles.
+
+Still to check on the live site: sign-out, and the wrong-role bounce (manual test 6).
 
 **Open items, in the agreed order:**
-1. Supabase server client (`lib/supabase-server.ts`), `requireRole()` (`lib/auth.ts`), login page with the demo buttons.
-2. Patient booking page (P1 to P6) with slot generation in `lib/rules.ts`.
-3. Receptionist dashboard (R1 to R3).
-4. Dentist view (D1 to D3). If time is short, cut this first.
-5. Owner screens: dentists, services, hours, closures, SMS log (O1 to O4).
-6. Add the three environment variables in Vercel, deploy, run the manual tests on the live site, fill in the live URL above.
-7. README with screenshots, the "What I'd add for a real client" section, and a clear "concept project, fictional data" label.
+1. Patient booking page (P1 to P6) with slot generation in `lib/rules.ts` and Colombo-time helpers in `lib/format.ts`.
+2. Receptionist dashboard (R1 to R3).
+3. Dentist view (D1 to D3). If time is short, cut this first.
+4. Owner screens: dentists, services, hours, closures, SMS log (O1 to O4).
+5. Run the full manual tests on the live site.
+6. README with screenshots, the "What I'd add for a real client" section, and a clear "concept project, fictional data" label.
 
-**Small cleanups:** `project-structure.txt` was committed by accident (remove with `git rm`).
-
-**Open questions:** one chair per dentist (unconfirmed); plain Tailwind vs a component library; final live URL.
+**Open questions:** one chair per dentist (unconfirmed); plain Tailwind vs a component library; time budget for the build (estimate 25 to 35 hours with AI help).
 
 ## Not in scope (do not build unless asked)
 
@@ -251,10 +282,15 @@ Real SMS or WhatsApp, reminders, payments, mobile app, Sinhala or Tamil, patient
 - Running several commands on separate PowerShell lines does not stop when one fails. Use `&&` to chain them (PowerShell 7).
 - The secret key bypasses all security. If it ever lands in a `NEXT_PUBLIC_` variable, in client code or in git, rotate it in Supabase immediately.
 - `.env.local` must stay in `.gitignore`. Never commit keys. Add the same variables in Vercel's project settings.
+- Vercel only reads environment variables when it builds. After changing them, redeploy. Vercel shows a "Needs Attention" badge on `SUPABASE_SECRET_KEY` and `DEMO_PASSWORD`; it is a hint to mark them Sensitive, not an error.
 - Do not use Vercel's "Add Supabase" integration. It would create a new database and inject its own variable names. We use the existing `ivora-dental` project and our own variables.
 - The Supabase CLI login is per account. If `npx supabase link` or `db push` shows other projects, you are logged into the wrong account: `npx supabase logout`, then `npx supabase login`. Never touch projects that are not `ivora-dental`.
 - Supabase Auth rejects passwords shorter than 6 characters, so `DEMO_PASSWORD` must be at least 6.
+- Sign-in must use its own throwaway Supabase client, never the shared secret-key client (see "Auth and sessions").
+- Pages that read cookies must sit inside `<Suspense>` (see "Next.js rules").
 - `npm audit` shows a few high-severity warnings from the toolchain. Do not run `npm audit fix --force`.
+- LF/CRLF warnings from git on Windows are harmless.
+- `project-structure.txt` (written by the owner's `struc` command) is git-ignored. Do not commit it.
 - Postgres range overlap treats `[10:00, 11:00)` and `[11:00, 12:00)` as not overlapping, which is what we want (back-to-back is allowed). Use `tstzrange(start_at, end_at)` with the default `[)` bounds.
 - `timestamptz` comes back from Supabase as a UTC ISO string. Convert to Asia/Colombo only when displaying. In the dashboard Table Editor, times show in UTC (9:00 AM Colombo = 03:30).
 - Supabase free projects pause after about a week of no activity. Open the project before showing it to someone, or the first load fails.
