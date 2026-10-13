@@ -1,32 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f7fa;
+  --background: #f1f5fb;
   --surface: #ffffff;
   --foreground: #15171a;
-  --muted: #667085;
-  --line: #e3e7ee;
+  --muted: #4b5563;
+  --line: #dde3ee;
 
   --primary: #15171a;
   --primary-hover: #33373d;
   --primary-foreground: #ffffff;
 
-  --accent: #3f6fb0;
-  --accent-soft: #dce7f6;
+  --brand: #2f5fb3;
+  --brand-light: #cfe1ff;
 
-  --tint-sky: #dce7f6;
-  --tint-sage: #dcebe0;
-  --tint-sand: #efe4da;
-  --tint-lilac: #e5e0f3;
+  --accent: #2f5fb3;
+  --accent-soft: #cfe0f7;
+
+  --tint-sky: #c3d9f7;
+  --tint-sage: #c6e3cf;
+  --tint-sand: #f3dfca;
+  --tint-lilac: #dbd2f6;
 
   --radius-card: 1.5rem;
-
-  --hairline-plate: var(--background);
-  --hairline-hi: #232327;
-  --hairline-edge: #a4a4ac;
-  --hairline-mid: #c3c3c9;
-  --hairline-lo: #e0e0e4;
-  --hairline-stroke: 0.9;
 }
 
 @theme inline {
@@ -38,13 +34,15 @@
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
+  --color-brand: var(--brand);
+  --color-brand-light: var(--brand-light);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-tint-sky: var(--tint-sky);
   --color-tint-sage: var(--tint-sage);
   --color-tint-sand: var(--tint-sand);
   --color-tint-lilac: var(--tint-lilac);
-  --radius-card: var(--radius-card);
+  --radius-card: 1.5rem;
   --font-sans: var(--font-outfit);
 }
 
@@ -93,7 +91,7 @@ body {
   .card {
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: var(--radius-card);
+    border-radius: 1.5rem;
   }
   .chip {
     display: inline-flex;

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import LandingSettle from "@/components/LandingSettle";
 
 const proofs = [
   {
@@ -31,6 +30,33 @@ const branches = [
   { name: "Negombo", tint: "bg-tint-sand" },
 ];
 
+const example = [
+  {
+    branch: "Colombo 7",
+    slots: [
+      { t: "9:00", taken: false },
+      { t: "9:30", taken: true },
+      { t: "10:00", taken: false },
+    ],
+  },
+  {
+    branch: "Nugegoda",
+    slots: [
+      { t: "9:00", taken: true },
+      { t: "9:30", taken: false },
+      { t: "10:00", taken: false },
+    ],
+  },
+  {
+    branch: "Negombo",
+    slots: [
+      { t: "9:00", taken: false },
+      { t: "9:30", taken: false },
+      { t: "10:00", taken: true },
+    ],
+  },
+];
+
 export default function HomePage() {
   return (
     <main className="mx-auto w-full max-w-6xl px-4 pb-16">
@@ -46,31 +72,62 @@ export default function HomePage() {
         </nav>
       </header>
 
-      <section className="card grid gap-8 p-6 sm:p-10 lg:grid-cols-2 lg:items-center">
+      <section className="grid gap-8 rounded-card bg-brand p-6 text-white sm:p-10 lg:grid-cols-2 lg:items-center">
         <div>
           <h1 className="text-4xl font-medium leading-tight tracking-tight sm:text-5xl">
             Dental care at three branches,{" "}
-            <span className="text-accent">booked in minutes.</span>
+            <span className="text-brand-light">booked in minutes.</span>
           </h1>
-          <p className="mt-4 max-w-md text-base text-muted">
+          <p className="mt-4 max-w-md text-base text-white/90">
             Colombo 7, Nugegoda and Negombo, with one shared schedule. Choose a
             branch, pick a time, and you&apos;re done.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/book" className="btn btn-dark">
+            <Link
+              href="/book"
+              className="btn bg-white text-foreground hover:bg-brand-light"
+            >
               Book now <span aria-hidden>→</span>
             </Link>
-            <Link href="/login" className="btn btn-light">
+            <Link
+              href="/login"
+              className="btn border border-white/50 text-white hover:bg-white/10"
+            >
               Staff demo sign in
             </Link>
           </div>
-          <p className="mt-6 text-sm text-muted">
+          <p className="mt-6 text-sm text-white/80">
             Concept project with fictional data. It shows an online booking page
             and staff screens for a three-branch clinic.
           </p>
         </div>
-        <div className="rounded-card bg-tint-sky p-6 sm:p-8">
-          <LandingSettle />
+
+        <div className="rounded-card bg-surface p-5 text-foreground sm:p-6">
+          <p className="text-sm font-medium">Example schedule</p>
+          <p className="mt-1 text-sm text-muted">
+            A taken time can&apos;t be booked twice.
+          </p>
+          <div className="mt-4 space-y-4">
+            {example.map((row) => (
+              <div key={row.branch}>
+                <p className="text-sm font-medium">{row.branch}</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {row.slots.map((s) => (
+                    <span
+                      key={s.t}
+                      className={
+                        s.taken
+                          ? "rounded-full bg-line px-4 py-1.5 text-sm text-muted line-through"
+                          : "rounded-full bg-tint-sky px-4 py-1.5 text-sm font-medium"
+                      }
+                    >
+                      {s.t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
