@@ -1,26 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f1f5fb;
+  --background: #eef3ff;
   --surface: #ffffff;
-  --foreground: #15171a;
-  --muted: #4b5563;
-  --line: #dde3ee;
+  --foreground: #0b1020;
+  --muted: #475069;
+  --line: #d9e2f7;
 
-  --primary: #15171a;
-  --primary-hover: #33373d;
+  --primary: #0b1020;
+  --primary-hover: #2a3550;
   --primary-foreground: #ffffff;
 
-  --brand: #2f5fb3;
-  --brand-light: #cfe1ff;
+  --brand: #003bcb;
+  --brand-light: #a9c2ff;
 
-  --accent: #2f5fb3;
-  --accent-soft: #cfe0f7;
+  --accent: #003bcb;
+  --accent-soft: #d6e2ff;
 
-  --tint-sky: #c3d9f7;
-  --tint-sage: #c6e3cf;
-  --tint-sand: #f3dfca;
-  --tint-lilac: #dbd2f6;
+  --pop: #ff5a36;
+
+  --tint-sky: #a8c7ff;
+  --tint-sage: #9debc0;
+  --tint-sand: #ffd08a;
+  --tint-lilac: #c9b8ff;
 
   --radius-card: 1.5rem;
 }
@@ -38,6 +40,7 @@
   --color-brand-light: var(--brand-light);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
+  --color-pop: var(--pop);
   --color-tint-sky: var(--tint-sky);
   --color-tint-sage: var(--tint-sage);
   --color-tint-sand: var(--tint-sand);
