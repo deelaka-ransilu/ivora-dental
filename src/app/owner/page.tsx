@@ -246,6 +246,9 @@ async function OwnerContent({
       <StaffHeader user={user} />
 
       <h1 className="mt-6 text-2xl font-bold">Schedule: {branchName}</h1>
+      <a href="/owner/sms" className="mt-2 inline-flex min-h-11 items-center underline">
+        View SMS log (simulated)
+      </a>
       <p className="mt-1 text-sm opacity-80">
         Week of {formatDate(colomboToDate(weekStart, "12:00"))} to{" "}
         {formatDate(colomboToDate(weekEnd, "12:00"))}: {active.length} booked
@@ -623,7 +626,6 @@ async function OwnerContent({
         <ComingSoon
           title="Still to build"
           items={[
-            "SMS log, labelled simulated",
             "Set up branches, dentists, services and opening hours (O2)",
             "Create and remove staff logins (O4)",
           ]}

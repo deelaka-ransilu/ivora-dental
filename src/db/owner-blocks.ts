@@ -5,6 +5,7 @@
 import { getSupabase } from "@/lib/supabase-server";
 import {
   addDaysToColomboDate,
+  colomboDateString,
   colomboToDate,
   isColomboDate,
 } from "@/lib/format";
@@ -58,7 +59,9 @@ export function parseBlockInput(raw: Record<string, string>): ParseResult {
   if (!m || !UUID.test(m[2])) return { ok: false, error: "target" };
 
   const startDate = raw.startDate ?? "";
-  if (!isColomboDate(startDate)) return { ok: false, error: "date" };
+  if (!isColomboDate(startDate) || startDate < colomboDateString()) {
+    return { ok: false, error: "date" };
+  }
 
   let endDate = raw.endDate ?? "";
   let startTime = raw.startTime ?? "";
