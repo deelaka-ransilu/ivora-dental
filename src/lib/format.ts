@@ -63,3 +63,15 @@ export function isColomboDate(value: string): boolean {
   const d = new Date(`${value}T00:00:00Z`);
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
 }
+// Minutes since midnight in Colombo time (0 to 1439). Used to place bookings on the week grid.
+export function colomboMinuteOfDay(value: string | Date): number {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date(value));
+  const h = Number(parts.find((p) => p.type === "hour")?.value ?? 0) % 24;
+  const m = Number(parts.find((p) => p.type === "minute")?.value ?? 0);
+  return h * 60 + m;
+}

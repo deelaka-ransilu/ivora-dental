@@ -3,11 +3,12 @@ import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth";
 import StaffHeader from "@/components/StaffHeader";
 import ComingSoon from "@/components/ComingSoon";
-import { getAllBranches, getWeekBookings } from "@/db/owner";
+import { getAllBranches, getWeekBookings, type OwnerBooking } from "@/db/owner";
 import {
   addDaysToColomboDate,
   colomboDateString,
   colomboDayOfWeek,
+  colomboMinuteOfDay,
   colomboToDate,
   formatDate,
   formatTime,
@@ -25,11 +26,11 @@ function one(value: string | string[] | undefined): string {
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const SOURCE_LABEL = {
-  online: "Online",
-  phone: "Phone",
-  walk_in: "Walk-in",
-} as const;
+// Grid settings. Bookings outside these hours are clipped to the edge.
+const START_MIN = 8 * 60;
+const END_MIN = 19 * 60;
+const PX_PER_MIN = 1.5;
+const GRID_HEIGHT = (END_MIN - START_MIN) * PX_PER_MIN;
 
 const linkButton =
   "inline-flex min-h-11 items-center justify-center rounded-md border border-neutral-500/60 px-4 text-base font-medium hover:bg-neutral-500/20";
@@ -42,6 +43,49 @@ function weekStartOf(isoDate: string): string {
   const dow = colomboDayOfWeek(isoDate); // 0 = Sunday ... 6 = Saturday
   const offset = dow === 0 ? -6 : 1 - dow;
   return addDaysToColomboDate(isoDate, offset);
+}
+
+type Placed = {
+  booking: OwnerBooking;
+  top: number;
+  height: number;
+  lane: number;
+  lanes: number;
+};
+
+// Places one day's bookings. Overlapping bookings get separate lanes
+// (side by side), like Google Calendar.
+function placeDay(items: OwnerBooking[]): Placed[] {
+  const sorted = [...items].sort((a, b) => a.startAt.localeCompare(b.startAt));
+  const laneEnds: number[] = [];
+  const rows: { booking: OwnerBooking; s: number; e: number; lane: number }[] =
+    [];
+
+  for (const b of sorted) {
+    const s = colomboMinuteOfDay(b.startAt);
+    const e = Math.max(colomboMinuteOfDay(b.endAt), s + 15);
+    let lane = laneEnds.findIndex((end) => end <= s);
+    if (lane === -1) {
+      lane = laneEnds.length;
+      laneEnds.push(e);
+    } else {
+      laneEnds[lane] = e;
+    }
+    rows.push({ booking: b, s, e, lane });
+  }
+
+  const lanes = Math.max(1, laneEnds.length);
+  return rows.map((r) => {
+    const s = Math.min(Math.max(r.s, START_MIN), END_MIN);
+    const e = Math.min(Math.max(r.e, START_MIN), END_MIN);
+    return {
+      booking: r.booking,
+      top: (s - START_MIN) * PX_PER_MIN,
+      height: Math.max((e - s) * PX_PER_MIN, 24),
+      lane: r.lane,
+      lanes,
+    };
+  });
 }
 
 // The page is not async. Cookies and searchParams are read in the child
@@ -87,6 +131,10 @@ async function OwnerContent({
   const days = Array.from({ length: 7 }, (_, i) =>
     addDaysToColomboDate(weekStart, i)
   );
+  const hours = Array.from(
+    { length: (END_MIN - START_MIN) / 60 },
+    (_, i) => START_MIN / 60 + i
+  );
 
   const branchQuery = branchId ? `&branch=${branchId}` : "";
   const thisWeekHref = branchId ? `/owner?branch=${branchId}` : "/owner";
@@ -94,14 +142,14 @@ async function OwnerContent({
   const nextHref = `/owner?week=${addDaysToColomboDate(weekStart, 7)}${branchQuery}`;
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6">
+    <main className="mx-auto max-w-6xl px-4 py-6">
       <StaffHeader user={user} />
 
       <h1 className="mt-6 text-2xl font-bold">Schedule: {branchName}</h1>
       <p className="mt-1 text-sm opacity-80">
         Week of {formatDate(colomboToDate(weekStart, "12:00"))} to{" "}
         {formatDate(colomboToDate(weekEnd, "12:00"))}: {active.length} booked
-        {cancelledCount > 0 ? `, ${cancelledCount} cancelled` : ""}
+        {cancelledCount > 0 ? `, ${cancelledCount} cancelled (not shown)` : ""}
       </p>
       <p className="mt-1 text-sm opacity-80">Read-only for now.</p>
 
@@ -143,57 +191,102 @@ async function OwnerContent({
         </button>
       </form>
 
-      <div className="mt-6 space-y-6">
-        {days.map((day) => {
-          const dayBookings = active.filter(
-            (b) => colomboDateString(b.startAt) === day
-          );
-          return (
-            <section key={day}>
-              <h2 className="text-base font-semibold">
-                {formatDate(colomboToDate(day, "12:00"))}
-                <span className="ml-2 text-sm font-normal opacity-80">
-                  ({dayBookings.length} booked)
-                </span>
-              </h2>
+      <div className="mt-6 overflow-x-auto">
+        <div className="min-w-[840px]">
+          {/* Day headings */}
+          <div className="flex border-b border-neutral-500/60">
+            <div className="w-14 shrink-0" />
+            {days.map((day) => {
+              const count = active.filter(
+                (b) => colomboDateString(b.startAt) === day
+              ).length;
+              return (
+                <div
+                  key={day}
+                  className="flex-1 border-l border-neutral-500/40 px-2 pb-2 text-center"
+                >
+                  <p className="text-sm font-semibold">
+                    {formatDate(colomboToDate(day, "12:00"))}
+                  </p>
+                  <p className="text-xs opacity-70">{count} booked</p>
+                </div>
+              );
+            })}
+          </div>
 
-              {dayBookings.length === 0 ? (
-                <p className="mt-2 text-sm opacity-80">No bookings.</p>
-              ) : (
-                <ul className="mt-2 space-y-2">
-                  {dayBookings.map((b) => (
-                    <li
-                      key={b.id}
-                      className="rounded-md border border-neutral-500/60 p-3"
+          {/* Time grid */}
+          <div className="flex">
+            <div className="relative w-14 shrink-0" style={{ height: GRID_HEIGHT }}>
+              {hours.map((h) => (
+                <div
+                  key={h}
+                  className="absolute right-2 -translate-y-1/2 text-xs opacity-70"
+                  style={{ top: (h * 60 - START_MIN) * PX_PER_MIN }}
+                >
+                  {formatTime(colomboToDate(days[0], `${String(h).padStart(2, "0")}:00`))}
+                </div>
+              ))}
+            </div>
+
+            {days.map((day) => {
+              const dayBookings = active.filter(
+                (b) => colomboDateString(b.startAt) === day
+              );
+              const placed = placeDay(dayBookings);
+              return (
+                <div
+                  key={day}
+                  className="relative flex-1 border-l border-neutral-500/40"
+                  style={{ height: GRID_HEIGHT }}
+                >
+                  {hours.map((h) => (
+                    <div
+                      key={h}
+                      className="absolute left-0 right-0 border-t border-neutral-500/20"
+                      style={{ top: (h * 60 - START_MIN) * PX_PER_MIN }}
+                    />
+                  ))}
+
+                  {placed.map((p) => (
+                    <div
+                      key={p.booking.id}
+                      title={`${formatTime(p.booking.startAt)} to ${formatTime(
+                        p.booking.endAt
+                      )}\n${p.booking.patientName} ${p.booking.patientPhone}\n${p.booking.serviceName} with ${p.booking.dentistName}\n${p.booking.branchName}`}
+                      className="absolute overflow-hidden rounded border border-primary/60 bg-primary/10 px-1 py-0.5 text-xs leading-tight"
+                      style={{
+                        top: p.top,
+                        height: p.height,
+                        left: `${(p.lane * 100) / p.lanes}%`,
+                        width: `calc(${100 / p.lanes}% - 3px)`,
+                      }}
                     >
                       <p className="font-semibold">
-                        {formatTime(b.startAt)} to {formatTime(b.endAt)}
-                        {!branchId && (
-                          <span className="ml-2 text-sm font-normal opacity-80">
-                            {b.branchName}
-                          </span>
-                        )}
+                        {formatTime(p.booking.startAt)}
                       </p>
-                      <p className="mt-1 text-sm">
-                        {b.patientName} ·{" "}
-                        <a
-                          href={`tel:${b.patientPhone}`}
-                          className="underline"
-                        >
-                          {b.patientPhone}
-                        </a>
-                      </p>
-                      <p className="text-sm opacity-80">
-                        {b.serviceName} with {b.dentistName} (
-                        {SOURCE_LABEL[b.source]})
-                      </p>
-                    </li>
+                      <p className="truncate">{p.booking.patientName}</p>
+                      {p.height >= 45 && (
+                        <p className="truncate opacity-80">
+                          {p.booking.serviceName}
+                        </p>
+                      )}
+                      {p.height >= 60 && (
+                        <p className="truncate opacity-80">
+                          {p.booking.dentistName}
+                        </p>
+                      )}
+                      {!branchId && p.height >= 75 && (
+                        <p className="truncate opacity-80">
+                          {p.booking.branchName}
+                        </p>
+                      )}
+                    </div>
                   ))}
-                </ul>
-              )}
-            </section>
-          );
-        })}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       <div className="mt-8">
